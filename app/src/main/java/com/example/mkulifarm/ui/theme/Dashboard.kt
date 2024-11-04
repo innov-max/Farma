@@ -2,15 +2,22 @@ package com.example.mkulifarm.ui.theme
 
 import Article
 import android.os.Bundle
+import android.util.Log
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -20,51 +27,74 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
 import coil.compose.rememberImagePainter
 import com.airbnb.lottie.compose.*
 import com.example.mkulifarm.R
+import com.example.mkulifarm.data.NewsResponse
+import com.example.mkulifarm.data.RetrofitClient
+import com.example.mkulifarm.data.RetrofitInstance
+import kotlinx.coroutines.delay
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 
-import fetchFarmingNews
+class Dashboard : ComponentActivity() {
 
-class Dashboard(navController: NavHostController) : AppCompatActivity() {
+
+
+     val apiKey = "edd9318bcadb4fa295854bb3f810b053"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Set the main content using Compose
+
+
         setContent {
-            DashboardScreen()
+            DashboardScreen(apiKey)
         }
     }
 }
 
-
 @Composable
 
-fun DashboardScreen() {
-    var selectedTab by remember { mutableStateOf(0) }
+fun DashboardScreen(apiKey: String) {
+    var selectedTab by remember { mutableIntStateOf(0) }
     var articles by remember { mutableStateOf(emptyList<Article>()) }
+    var isLoading by remember { mutableStateOf(true) }
+    var errorMessage by remember { mutableStateOf("") }
 
     // Fetch articles when the DashboardScreen is first composed
+
     LaunchedEffect(Unit) {
-        articles = fetchFarmingNews() // Make sure this returns a List<Article>
+        fetchFarmingNews(apiKey) { fetchedArticles, error ->
+            articles = fetchedArticles ?: emptyList()
+            Log.d("DashboardScreen", "Fetched ${articles.size} articles")
+            isLoading = false
+            errorMessage = error ?: ""
+        }
     }
 
-    // Main layout with Scaffold for bottom navigation and content
+
+
     Scaffold(
-        bottomBar = { BottomNavigationBar(selectedTab) { selectedTab = it } }
+        bottomBar = { BottomNavigationBar(selectedTab)
+
+        { selectedTab = it }
+        }
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -78,67 +108,15 @@ fun DashboardScreen() {
             when (selectedTab) {
                 0 -> MetricsSection()
                 1 -> QuickActionsSection()
-                2 -> TrendsSection(articles)
+                2 -> TrendsSection(articles, isLoading, errorMessage)
             }
-
             QuickActionsSection()
-            TrendsSection(articles)
+            TrendsSection(articles, isLoading, errorMessage)
+
+
         }
     }
 }
-
-
-@Composable
-fun TrendsSection(articles: List<Article>, isLoading: Boolean) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(200.dp)
-            .padding(4.dp),
-        shape = RoundedCornerShape(8.dp)
-    ) {
-        Column {
-            Text("Farming News", fontSize = 16.sp, color = Color.Gray, modifier = Modifier.padding(8.dp))
-
-            if (isLoading) {
-                // Show loading indicator while data is being fetched
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            } else {
-                LazyColumn {
-                    items(articles) { article ->
-                        ArticleItem(article)
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun ArticleItem(article: Article) {
-    Column(
-        modifier = Modifier
-            .width(150.dp)
-            .background(Color.White, shape = RoundedCornerShape(8.dp))
-            .padding(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        if (article.urlToImage != null) {
-            Image(
-                painter = rememberImagePainter(data = article.urlToImage),
-                contentDescription = article.title,
-                modifier = Modifier
-                    .size(100.dp)
-                    .background(Color.LightGray, shape = RoundedCornerShape(4.dp))
-            )
-        }
-        Text(text = article.title, fontSize = 12.sp, color = Color.Black, textAlign = TextAlign.Center)
-    }
-}
-
-
 
 @Composable
 fun TopBar() {
@@ -148,12 +126,15 @@ fun TopBar() {
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Image(
-            painter = painterResource(id = R.drawable.logo),
+            painter = painterResource(id = R.drawable.profile),
             contentDescription = "App Logo",
             modifier = Modifier.size(55.dp)
+                .clip(CircleShape)
                 .padding(horizontal = 10.dp)
+
         )
-        Text(text = "Farminika", fontSize = 24.sp, color = Color.Green)
+        Text(text = "Farminika", fontSize = 34.sp,
+            color = Color.Black,)
         Row {
             IconButton(onClick = { /* Refresh Data */ }) {
                 Icon(Icons.Filled.Refresh, contentDescription = "Refresh")
@@ -164,21 +145,17 @@ fun TopBar() {
         }
     }
 }
-@Composable
-fun LoadingIndicator() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator()
-    }
-}
 
 @Composable
 fun MetricsSection() {
     // Container for displaying main metrics with a title
     Column(
         modifier = Modifier
+            .padding(vertical = 10.dp)
             .fillMaxWidth()
             .background(Color.White, RoundedCornerShape(8.dp))
             .padding(16.dp)
+
     ) {
         Text("Current Conditions", fontSize = 18.sp, color = Color.DarkGray)
         Spacer(modifier = Modifier.height(8.dp))
@@ -188,8 +165,8 @@ fun MetricsSection() {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            MetricCard(title = "Temperature", value = "25°C", lottieFile = "temp.json")
-            MetricCard(title = "Humidity", value = "60%", lottieFile = "humidity.json")
+            MetricCard(title = "Temperature", value = "25°C", lottieFile = R.raw.temp.toString())
+            MetricCard(title = "Humidity", value = "60%", lottieFile = R.raw.water.toString())
             MetricCard(title = "Soil Moisture", value = "45%", lottieFile = "soil_moisture.json")
         }
     }
@@ -209,11 +186,7 @@ fun MetricCard(title: String, value: String, lottieFile: String) {
     ) {
         Box {
             // Display Lottie animation in the background
-            LottieAnimation(
-                composition,
-                progress,
-                modifier = Modifier.fillMaxSize()
-            )
+
             Column(
                 modifier = Modifier.padding(8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -222,6 +195,12 @@ fun MetricCard(title: String, value: String, lottieFile: String) {
                 Text(text = title, fontSize = 10.sp, color = Color.Gray)
                 Text(text = value, fontSize = 20.sp, color = Color.Black)
             }
+            LottieAnimation(
+                composition,
+                progress,
+                modifier = Modifier.fillMaxSize()
+                    .padding(vertical = 10.dp)
+            )
         }
     }
 }
@@ -237,15 +216,38 @@ fun QuickActionsSection() {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceAround
         ) {
-            QuickActionButton(label = "Water Plants")
-            QuickActionButton(label = "Adjust Temperature")
-            QuickActionButton(label = "Enable Sensors")
+            QuickActionButton(
+                label = "Water Plants",
+                animationRes = R.raw.water
+            ) {
+                // Add action for Water Plants
+            }
+
+            QuickActionButton(
+                label = "Adjust Temperature",
+                animationRes = R.raw.temp
+            ) {
+                // Add action for Adjust Temperature
+            }
+
+            QuickActionButton(
+                label = "Enable Sensors",
+                animationRes = R.raw.water
+
+            ) {
+                // Add action for Enable Sensors
+            }
         }
     }
 }
 
+
 @Composable
-fun QuickActionButton(label: String) {
+fun QuickActionButton(
+    label: String,
+    animationRes: Int,
+    onClick: () -> Unit
+) {
     // Single action button within the Quick Actions section
     Card(
         modifier = Modifier
@@ -256,55 +258,75 @@ fun QuickActionButton(label: String) {
         elevation = CardDefaults.cardElevation(defaultElevation = 50.dp)
     ) {
         Box(
-            contentAlignment = Alignment.Center,  // Center the content within the Box
-            modifier = Modifier.fillMaxSize()      // Ensure Box fills entire card space
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxSize()
         ) {
             Text(
                 text = label,
                 fontSize = 10.sp,
                 color = Color.DarkGray,
-                modifier = Modifier.align(Alignment.Center)  // Center-align the Text explicitly
+                modifier = Modifier.align(Alignment.Center)
             )
+        }
+
+        //Hardware Actions
+        Modifier.clickable {
+            // Send request to turn LED on or off based on label
+            when (label) {
+                "Enable Sensors" -> {
+                    toggleLED("on") // Turn LED on
+                }
+                "Water Plants" -> {
+                    toggleLED("on") // Turn LED on
+                }
+                // You can add more actions for other buttons if needed
+            }
+        }
+    }
+}
+@Composable
+fun TrendsSection(articles: List<Article>, isLoading: Boolean, errorMessage: String) {
+    val lazyListState = rememberLazyListState() // State for LazyRow
+    var currentIndex by remember { mutableStateOf(0) } // Track current index for scaling effect
+
+    // Change the focused article every 2 seconds
+    LaunchedEffect(articles) {
+        while (articles.isNotEmpty()) {
+            delay(2000)
+            currentIndex = (currentIndex + 1) % articles.size
+            // Scroll to the next item
+            lazyListState.animateScrollToItem(currentIndex) // Scroll to the current index
         }
     }
 
-}
-
-
-@Composable
-
-fun TrendsSection(articles: List<Article>) {
-    // Card containing the title and a LazyColumn to display articles
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(200.dp)
-            .padding(4.dp),
+            .height(300.dp)
+            .padding(8.dp),
         shape = RoundedCornerShape(8.dp)
     ) {
         Column {
             Text("Farming News", fontSize = 16.sp, color = Color.Gray, modifier = Modifier.padding(8.dp))
 
-            LazyColumn {
-                items(articles) { article ->
-                    Column(
-                        modifier = Modifier
-                            .width(150.dp)
-                            .background(Color.White, shape = RoundedCornerShape(8.dp))
-                            .padding(8.dp)
-                            .padding(4.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        if (article.urlToImage != null) {
-                            Image(
-                                painter = rememberImagePainter(data = article.urlToImage),
-                                contentDescription = article.title,
-                                modifier = Modifier
-                                    .size(100.dp)
-                                    .background(Color.LightGray, shape = RoundedCornerShape(4.dp))
-                            )
-                        }
-                        Text(text = article.title, fontSize = 12.sp, color = Color.Black, textAlign = TextAlign.Center)
+            if (isLoading) {
+                // Show loading indicator while data is being fetched
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            } else if (errorMessage.isNotEmpty()) {
+                // Show error message
+                Text(text = errorMessage, color = Color.Red, modifier = Modifier.padding(8.dp))
+            } else if (articles.isEmpty()) {
+                Text("No news available", color = Color.Gray, modifier = Modifier.padding(8.dp))
+            } else {
+                LazyRow(
+                    state = lazyListState, // Set the state here
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    itemsIndexed(articles) { index, article ->
+                        ArticleItem(article, isFocused = index == currentIndex)
                     }
                 }
             }
@@ -313,10 +335,75 @@ fun TrendsSection(articles: List<Article>) {
 }
 
 
+@Composable
+fun ArticleItem(article: Article, isFocused: Boolean) {
+    // Animate scale of focused item
+    val scale by animateFloatAsState(if (isFocused) 1.1f else 1.0f, label = "") // Scale up if focused
+
+    Column(
+        modifier = Modifier
+            .width(150.dp)
+            .graphicsLayer(
+                scaleX = scale,
+                scaleY = scale
+            )
+            .background(Color.White, shape = RoundedCornerShape(8.dp))
+            .padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        if (article.imageUrl != null) {
+            val imagePainter = rememberImagePainter(
+                data = article.imageUrl,
+                builder = {
+                    placeholder(R.drawable.profile) // Add your placeholder image in `res/drawable`
+                    error(R.drawable.error) // Optional: Show an error image if the URL fails to load
+                }
+            )
+            Image(
+                painter = imagePainter,
+                contentDescription = article.title,
+                modifier = Modifier
+                    .size(150.dp)
+                    .background(Color.LightGray, shape = RoundedCornerShape(4.dp)),
+                contentScale = ContentScale.Crop
+            )
+
+        }
+        Text(
+            text = article.title,
+            fontSize = 12.sp,
+            color = Color.Black,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(top = 8.dp)
+        )
+    }
+}
 
 
+fun fetchFarmingNews(apiKey: String, callback: (List<Article>?, String?) -> Unit) {
+    RetrofitInstance.api.getEverything("farming", apiKey).enqueue(object : Callback<NewsResponse> {
+        override fun onResponse(call: Call<NewsResponse>, response: Response<NewsResponse>) {
+            if (response.isSuccessful) {
+                val articles = response.body()?.articles?.map { networkArticle ->
+                    // Map each network article to the UI-specific Article model
+                    Article(
+                        title = networkArticle.title,
+                        description = networkArticle.description,
+                        url = networkArticle.url,
+                        imageUrl = networkArticle.urlToImage
+                    )
+                } ?: emptyList()
+                callback(articles, null)  // Pass mapped articles if successful
+            } else {
+                callback(null, "Failed to fetch news: ${response.errorBody()?.string()}")
+            }
+        }
 
-
+        override fun onFailure(call: Call<NewsResponse>, t: Throwable) {
+            callback(null, "API call failed: ${t.message}")
+        }
+    })
+}
 
 @Composable
 fun BottomNavigationBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
@@ -345,6 +432,26 @@ fun BottomNavigationBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
     }
 }
 
+fun toggleLED(action: String) {
+    val api = RetrofitClient.instance
+    val call = api.toggleLED(action)
+
+    call.enqueue(object : retrofit2.Callback<Void> {
+        override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+            if (response.isSuccessful) {
+                Log.d("QuickActionButton", "LED toggled successfully")
+            } else {
+                Log.e("QuickActionButton", "Error response: ${response.code()}")
+            }
+        }
+
+        override fun onFailure(call: Call<Void>, t: Throwable) {
+            Log.e("QuickActionButton", "Failed to send request: ${t.message}")
+        }
+    })
+}
+
+
 
 
 
@@ -352,5 +459,5 @@ fun BottomNavigationBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun PreviewDashboardScreen() {
-    DashboardScreen()
+    DashboardScreen(apiKey = "edd9318bcadb4fa295854bb3f810b053")
 }

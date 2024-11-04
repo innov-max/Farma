@@ -1,4 +1,5 @@
 [versions]
+accompanistCoil = "0.15.0"
 agp = "8.5.2"
 kotlin = "1.9.0"
 coreKtx = "1.13.1"
@@ -22,8 +23,10 @@ constraintlayout = "2.1.4"
 material3 = "<latest_version>"
 materialVersion = "1.7.5"
 navigationCompose = "2.8.3"
+newsApiJava = "1.0.0"
 
 [libraries]
+accompanist-coil = { module = "com.google.accompanist:accompanist-coil", version.ref = "accompanistCoil" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-material = { module = "androidx.compose.material:material", version.ref = "materialVersion" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -52,6 +55,7 @@ androidx-activity = { group = "androidx.activity", name = "activity", version.re
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
+news-api-java = { module = "com.github.KwabenBerko:News-API-Java", version.ref = "newsApiJava" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

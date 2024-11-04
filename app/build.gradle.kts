@@ -91,6 +91,11 @@ dependencies {
     implementation ("io.ktor:ktor-client-cio:2.3.3") // Ktor Client CIO engine
     implementation (libs.kotlinx.serialization.json.v160) // Kotlinx Serialization
     implementation("io.ktor:ktor-client-content-negotiation:2.3.3")
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation ("com.squareup.okhttp3:okhttp:4.9.3")
+
+
 }
 
 

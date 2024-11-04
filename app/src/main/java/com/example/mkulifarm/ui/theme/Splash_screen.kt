@@ -1,5 +1,6 @@
 package com.example.mkulifarm.ui.theme
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -45,36 +47,31 @@ class Splash_screen :  ComponentActivity() {
 
 @Composable
 fun FarmMonitoringApp() {
-    val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "splash") {
-        composable("splash") { Splashscreen(navController) }
-        composable("login") { Login(navController) }
-        composable("dashboard") { Dashboard(navController) }
-    }
+    Splashscreen()
 }
 
 @Composable
-fun Splashscreen(navController: androidx.navigation.NavController) {
-    val isLoggedIn = remember { mutableStateOf(false) } // Replace with actual auth status
+
+fun Splashscreen() {
+    val isLoggedIn = remember { mutableStateOf(true) } // Replace with actual auth status
+    val context = LocalContext.current // Get the current context
 
     // Delay to simulate loading time
     LaunchedEffect(Unit) {
         delay(5000L) // 5 seconds delay
-        // Replace with actual authentication check logic
         if (isLoggedIn.value) {
-            navController.navigate("dashboard") {
-                popUpTo("splash") { inclusive = true }
-            }
-        } else {
-            navController.navigate("dashboard") {
-                popUpTo("splash") { inclusive = true }
-            }
+            // Start the Dashboard activity
+            val intent = Intent(context, Dashboard::class.java)
+            context.startActivity(intent)
+            // Close the Splash screen to prevent navigating back to it
+            (context as? ComponentActivity)?.finish()
         }
     }
 
     // Splash Screen UI
     SplashScreenContent()
 }
+
 
 @Composable
 fun SplashScreenContent() {
