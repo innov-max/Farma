@@ -2,10 +2,16 @@ package com.example.mkulifarm.ui.theme
 
 import Article
 import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Geocoder
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.core.animateFloatAsState
@@ -49,6 +55,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
 import coil.compose.rememberImagePainter
 import com.airbnb.lottie.compose.*
 import com.example.mkulifarm.R
@@ -64,6 +71,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.util.Locale
+
 
 
 class Dashboard : ComponentActivity() {
@@ -125,16 +133,9 @@ fun DashboardScreen(apiKey: String) {
     var articles by remember { mutableStateOf(emptyList<Article>()) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf("") }
-    var locationName by remember { mutableStateOf("Loading location...") }
-    val context = LocalContext.current
-    val activity = context as Dashboard
+
 
     // Fetch articles when the DashboardScreen is first composed
-    LaunchedEffect(Unit) {
-        activity.getCurrentLocation { location ->
-            locationName = location
-        }
-    }
 
     LaunchedEffect(Unit) {
         fetchFarmingNews(apiKey) { fetchedArticles, error ->
@@ -179,6 +180,7 @@ fun DashboardScreen(apiKey: String) {
 
 @Composable
 fun TopBar() {
+    val context = LocalContext.current
     // Top bar containing logo, title, and action icons
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -193,23 +195,57 @@ fun TopBar() {
                 .padding(horizontal = 10.dp)
 
         )
-        Text(text = "Farmacare", fontSize = 34.sp,
-            color = Color.Black,)
+        Column(
+            modifier = Modifier.padding(8.dp),
+
+            ) {
+
+            Text(
+                text = "Farmacare", fontSize = 34.sp,
+                color = Color.Black,
+            )
+            /*val locationName by remember { mutableStateOf("...") }
+            Text(
+                text = locationName,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )*/
+        }
+
+        Column(
+            modifier = Modifier.padding(8.dp),
+
+        ){
         Row {
             IconButton(onClick = { /* Refresh Data */ }) {
                 Icon(Icons.Filled.Refresh, contentDescription = "Refresh")
+
+
             }
-            IconButton(onClick = { /* Navigate to Settings */ }) {
+            IconButton(onClick = { /* Navigate to Settings */
+
+                navigateTo(context, Settings::class.java)
+
+
+
+            }) {
                 Icon(Icons.Filled.Settings, contentDescription = "Settings")
             }
+
+
+
+
+            }
+
+
         }
+
     }
 }
 
 @Composable
 fun MetricsSection() {
-    // Container for displaying main metrics with a title
-    var locationName by remember { mutableStateOf("Loading location...") }
     Column(
         modifier = Modifier
             .padding(vertical = 10.dp)
@@ -220,12 +256,7 @@ fun MetricsSection() {
     ) {
         Text("Current Conditions", fontSize = 18.sp, color = Color.DarkGray)
         Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "Location: $locationName",
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black
-        )
+
 
         // Metrics row displaying temperature, humidity, and soil moisture
         Row(
@@ -319,13 +350,31 @@ fun QuickActionButton(
     animationRes: Int,
     onClick: () -> Unit
 ) {
-    // Single action button within the Quick Actions section
+    var ledStatus by remember { mutableStateOf(false) }
+    val cardColor = if (ledStatus) Color(0xFFFF5722) else Color(0xFF8BC34A)
+    val context = LocalContext.current
     Card(
         modifier = Modifier
             .size(100.dp, 80.dp)
-            .padding(4.dp),
+            .padding(4.dp)
+            .clickable {
+                // Toggle the LED status and send request based on label
+                when (label) {
+                    "Enable Sensors" -> {
+                        toggleLED(if (ledStatus) "off" else "on") // Toggle LED state
+                        ledStatus = !ledStatus // Update state after the request
+                        showLEDNotification(context, if (ledStatus) "on" else "off")
+                    }
+                    "Water Plants" -> {
+                        toggleLED(if (ledStatus) "off" else "on") // Toggle LED state
+                        ledStatus = !ledStatus // Update state after the request
+                        showLEDNotification(context, if (ledStatus) "on" else "off")
+                    }
+                    // Add more actions as necessary
+                }
+            },
         shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF8BC34A)),
+        colors = CardDefaults.cardColors(containerColor = cardColor), // Set the card color based on LED status
         elevation = CardDefaults.cardElevation(defaultElevation = 50.dp)
     ) {
         Box(
@@ -339,22 +388,10 @@ fun QuickActionButton(
                 modifier = Modifier.align(Alignment.Center)
             )
         }
-
-        //Hardware Actions
-        Modifier.clickable {
-            // Send request to turn LED on or off based on label
-            when (label) {
-                "Enable Sensors" -> {
-                    toggleLED("on") // Turn LED on
-                }
-                "Water Plants" -> {
-                    toggleLED("on") // Turn LED on
-                }
-                // You can add more actions for other buttons if needed
-            }
-        }
     }
 }
+
+
 @Composable
 fun TrendsSection(articles: List<Article>, isLoading: Boolean, errorMessage: String) {
     val lazyListState = rememberLazyListState() // State for LazyRow
@@ -590,7 +627,6 @@ fun WeatherDetailItem(value: String, label: String) {
 }
 
 
-
 @Composable
 fun BottomNavigationBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
     NavigationBar(
@@ -617,15 +653,24 @@ fun BottomNavigationBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
         )
     }
 }
+fun navigateTo(context: Context, targetActivity: Class<*>) {
+    val intent = Intent(context, targetActivity)
+    context.startActivity(intent)
+}
+
+
 
 fun toggleLED(action: String) {
     val api = RetrofitClient.instance
     val call = api.toggleLED(action)
 
+
+
     call.enqueue(object : retrofit2.Callback<Void> {
         override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
             if (response.isSuccessful) {
                 Log.d("QuickActionButton", "LED toggled successfully")
+
             } else {
                 Log.e("QuickActionButton", "Error response: ${response.code()}")
             }
@@ -635,6 +680,37 @@ fun toggleLED(action: String) {
             Log.e("QuickActionButton", "Failed to send request: ${t.message}")
         }
     })
+}
+fun showLEDNotification(context: Context, action: String) {
+    val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+    // Create notification channel for Android 8.0 and above
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val channel = NotificationChannel(
+            "led_toggle_channel",
+            "Sensor arm Notifications",
+            NotificationManager.IMPORTANCE_DEFAULT
+        )
+        notificationManager.createNotificationChannel(channel)
+    }
+
+    // Create notification content based on LED action
+    val notificationContent = if (action == "on") {
+        "Sensors Armed"
+    } else {
+        "LED has been turned OFF"
+    }
+
+    // Create notification
+    val notification = NotificationCompat.Builder(context, "led_toggle_channel")
+        .setSmallIcon(android.R.drawable.ic_notification_overlay)
+        .setContentTitle("sensor Status")
+        .setContentText(notificationContent)
+        .setPriority(NotificationCompat.PRIORITY_HIGH)
+        .build()
+
+    // Show notification
+    notificationManager.notify(0, notification)
 }
 
 
