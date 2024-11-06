@@ -1,16 +1,15 @@
 package com.example.mkulifarm.data
-
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-object RetrofitClient {
-    private const val BASE_URL = "http://192.168.100.150/" // Replace with your ESP8266 IP
+object WeatherRetrofitClient {
+    private const val BASE_URL = "https://api.openweathermap.org/"
 
-    val instance: Esp8266Api by lazy {
+    val instance: WeatherApiService by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(Esp8266Api::class.java)
+            .create(WeatherApiService::class.java)
     }
 }

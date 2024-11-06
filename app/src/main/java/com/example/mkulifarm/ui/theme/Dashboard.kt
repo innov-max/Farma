@@ -1,6 +1,9 @@
 package com.example.mkulifarm.ui.theme
 
 import Article
+import android.Manifest
+import android.content.pm.PackageManager
+import android.location.Geocoder
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -27,6 +30,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,21 +41,29 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
 import coil.compose.rememberImagePainter
 import com.airbnb.lottie.compose.*
 import com.example.mkulifarm.R
 import com.example.mkulifarm.data.NewsResponse
 import com.example.mkulifarm.data.RetrofitClient
 import com.example.mkulifarm.data.RetrofitInstance
+import com.example.mkulifarm.data.WeatherData
+import com.example.mkulifarm.data.WeatherViewModel
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.delay
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.util.Locale
 
 
 class Dashboard : ComponentActivity() {
@@ -59,14 +71,51 @@ class Dashboard : ComponentActivity() {
 
 
      val apiKey = "edd9318bcadb4fa295854bb3f810b053"
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
 
         setContent {
             DashboardScreen(apiKey)
         }
     }
+    fun getCurrentLocation(onLocationRetrieved: (String) -> Unit) {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return
+        }
+        fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+            if (location != null) {
+                val geocoder = Geocoder(this, Locale.getDefault())
+                val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
+                val locationName = if (addresses?.isNotEmpty() == true) {
+                    "${addresses.get(0)?.locality}, ${addresses[0].countryName}"
+                } else {
+                    "Unknown Location"
+                }
+                onLocationRetrieved(locationName)
+            } else {
+                onLocationRetrieved("Unable to fetch location")
+            }
+        }
+    }
+
 }
 
 @Composable
@@ -76,8 +125,16 @@ fun DashboardScreen(apiKey: String) {
     var articles by remember { mutableStateOf(emptyList<Article>()) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf("") }
+    var locationName by remember { mutableStateOf("Loading location...") }
+    val context = LocalContext.current
+    val activity = context as Dashboard
 
     // Fetch articles when the DashboardScreen is first composed
+    LaunchedEffect(Unit) {
+        activity.getCurrentLocation { location ->
+            locationName = location
+        }
+    }
 
     LaunchedEffect(Unit) {
         fetchFarmingNews(apiKey) { fetchedArticles, error ->
@@ -112,6 +169,8 @@ fun DashboardScreen(apiKey: String) {
             }
             QuickActionsSection()
             TrendsSection(articles, isLoading, errorMessage)
+            WeatherScreen()
+
 
 
         }
@@ -128,12 +187,13 @@ fun TopBar() {
         Image(
             painter = painterResource(id = R.drawable.profile),
             contentDescription = "App Logo",
-            modifier = Modifier.size(55.dp)
+            modifier = Modifier
+                .size(55.dp)
                 .clip(CircleShape)
                 .padding(horizontal = 10.dp)
 
         )
-        Text(text = "Farminika", fontSize = 34.sp,
+        Text(text = "Farmacare", fontSize = 34.sp,
             color = Color.Black,)
         Row {
             IconButton(onClick = { /* Refresh Data */ }) {
@@ -149,6 +209,7 @@ fun TopBar() {
 @Composable
 fun MetricsSection() {
     // Container for displaying main metrics with a title
+    var locationName by remember { mutableStateOf("Loading location...") }
     Column(
         modifier = Modifier
             .padding(vertical = 10.dp)
@@ -159,6 +220,12 @@ fun MetricsSection() {
     ) {
         Text("Current Conditions", fontSize = 18.sp, color = Color.DarkGray)
         Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Location: $locationName",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black
+        )
 
         // Metrics row displaying temperature, humidity, and soil moisture
         Row(
@@ -186,6 +253,13 @@ fun MetricCard(title: String, value: String, lottieFile: String) {
     ) {
         Box {
             // Display Lottie animation in the background
+            LottieAnimation(
+                composition,
+                progress,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 10.dp)
+            )
 
             Column(
                 modifier = Modifier.padding(8.dp),
@@ -195,12 +269,7 @@ fun MetricCard(title: String, value: String, lottieFile: String) {
                 Text(text = title, fontSize = 10.sp, color = Color.Gray)
                 Text(text = value, fontSize = 20.sp, color = Color.Black)
             }
-            LottieAnimation(
-                composition,
-                progress,
-                modifier = Modifier.fillMaxSize()
-                    .padding(vertical = 10.dp)
-            )
+
         }
     }
 }
@@ -220,6 +289,8 @@ fun QuickActionsSection() {
                 label = "Water Plants",
                 animationRes = R.raw.water
             ) {
+                
+
                 // Add action for Water Plants
             }
 
@@ -292,7 +363,7 @@ fun TrendsSection(articles: List<Article>, isLoading: Boolean, errorMessage: Str
     // Change the focused article every 2 seconds
     LaunchedEffect(articles) {
         while (articles.isNotEmpty()) {
-            delay(2000)
+            delay(20000)
             currentIndex = (currentIndex + 1) % articles.size
             // Scroll to the next item
             lazyListState.animateScrollToItem(currentIndex) // Scroll to the current index
@@ -302,7 +373,7 @@ fun TrendsSection(articles: List<Article>, isLoading: Boolean, errorMessage: Str
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(300.dp)
+            .height(240.dp)
             .padding(8.dp),
         shape = RoundedCornerShape(8.dp)
     ) {
@@ -355,15 +426,15 @@ fun ArticleItem(article: Article, isFocused: Boolean) {
             val imagePainter = rememberImagePainter(
                 data = article.imageUrl,
                 builder = {
-                    placeholder(R.drawable.profile) // Add your placeholder image in `res/drawable`
-                    error(R.drawable.error) // Optional: Show an error image if the URL fails to load
+                    placeholder(R.drawable.profile)
+                    error(R.drawable.error) 
                 }
             )
             Image(
                 painter = imagePainter,
                 contentDescription = article.title,
                 modifier = Modifier
-                    .size(150.dp)
+                    .size(130.dp)
                     .background(Color.LightGray, shape = RoundedCornerShape(4.dp)),
                 contentScale = ContentScale.Crop
             )
@@ -384,6 +455,8 @@ fun fetchFarmingNews(apiKey: String, callback: (List<Article>?, String?) -> Unit
     RetrofitInstance.api.getEverything("farming", apiKey).enqueue(object : Callback<NewsResponse> {
         override fun onResponse(call: Call<NewsResponse>, response: Response<NewsResponse>) {
             if (response.isSuccessful) {
+
+
                 val articles = response.body()?.articles?.map { networkArticle ->
                     // Map each network article to the UI-specific Article model
                     Article(
@@ -403,7 +476,120 @@ fun fetchFarmingNews(apiKey: String, callback: (List<Article>?, String?) -> Unit
             callback(null, "API call failed: ${t.message}")
         }
     })
+
+
 }
+@Composable
+fun WeatherScreen(viewModel: WeatherViewModel = WeatherViewModel()) {
+    val weatherData by viewModel.weatherData.observeAsState()
+
+    if (weatherData == null) {
+        // Display loading or error message when weatherData is null
+        Text(text = "No weather data available", color = Color.Red)
+    } else {
+
+        Card(
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 50.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Weather Icon and Temperature
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.cloud), // Replace with actual weather icon
+                        contentDescription = "Weather Icon",
+                        tint = Color(0xFFFFA726),
+                        modifier = Modifier.size(40.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    weatherData?.let {
+                        Text(
+                            text = "${weatherData?.temperature ?: "--"}°C",
+                            fontSize = 32.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF424242)
+                        )
+                    }
+                    }
+
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Weather Details
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    weatherData?.let {
+                        WeatherDetailItem(value = "${it.soilTemperature}°C", label = "Soil Temp")
+                        WeatherDetailItem(value = "${it.humidity}%", label = "Humidity")
+                        WeatherDetailItem(value = "${it.windSpeed} m/s", label = "Wind")
+                        WeatherDetailItem(value = "${it.precipitation} mm", label = "Precipitation")
+                        Log.d("WeatherScreen", "Weather data: $weatherData")
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Sunrise and Sunset
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+
+                        Text(
+                            text = "${weatherData?.sunrise ?: "--"}°C",
+                            fontSize = 32.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF424242)
+                        )
+                    }
+                        Text(
+                            text = weatherData?.sunset ?: "--",
+                            fontSize = 32.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF424242)
+                        )
+
+                    }
+
+                    }
+                }
+
+
+
+
+
+@Composable
+fun WeatherDetailItem(value: String, label: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = value,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = Color(0xFF424242)
+        )
+        Text(
+            text = label,
+            fontSize = 12.sp,
+            color = Color(0xFF757575)
+        )
+    }
+}
+
+
 
 @Composable
 fun BottomNavigationBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
@@ -456,8 +642,11 @@ fun toggleLED(action: String) {
 
 
 
+
+
 @Preview(showBackground = true)
 @Composable
 fun PreviewDashboardScreen() {
     DashboardScreen(apiKey = "edd9318bcadb4fa295854bb3f810b053")
 }
+
