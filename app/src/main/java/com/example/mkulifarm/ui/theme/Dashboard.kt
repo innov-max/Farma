@@ -2,6 +2,7 @@ package com.example.mkulifarm.ui.theme
 
 import Article
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -20,7 +21,9 @@ import androidx.compose.foundation.background
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -38,6 +41,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -62,7 +66,6 @@ import com.example.mkulifarm.R
 import com.example.mkulifarm.data.NewsResponse
 import com.example.mkulifarm.data.RetrofitClient
 import com.example.mkulifarm.data.RetrofitInstance
-import com.example.mkulifarm.data.WeatherData
 import com.example.mkulifarm.data.WeatherViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -70,6 +73,8 @@ import kotlinx.coroutines.delay
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 
@@ -344,6 +349,7 @@ fun QuickActionsSection() {
 }
 
 
+@SuppressLint("UnrememberedMutableState")
 @Composable
 fun QuickActionButton(
     label: String,
@@ -351,8 +357,13 @@ fun QuickActionButton(
     onClick: () -> Unit
 ) {
     var ledStatus by remember { mutableStateOf(false) }
-    val cardColor = if (ledStatus) Color(0xFFFF5722) else Color(0xFF8BC34A)
+    val ledStates = mutableStateMapOf(1 to false, 2 to false, 3 to false, 4 to false)
+
     val context = LocalContext.current
+
+// Determine the card color based on LED state
+    val cardColor = if (ledStatus) Color(0xFFFF5722) else Color(0xFF8BC34A)
+
     Card(
         modifier = Modifier
             .size(100.dp, 80.dp)
@@ -361,20 +372,60 @@ fun QuickActionButton(
                 // Toggle the LED status and send request based on label
                 when (label) {
                     "Enable Sensors" -> {
-                        toggleLED(if (ledStatus) "off" else "on") // Toggle LED state
-                        ledStatus = !ledStatus // Update state after the request
+                        val currentState = ledStates[1] ?: false
+                        toggleLED(if (currentState) "off" else "on", 1) // Toggle LED 1
+                        ledStates[1] = !currentState
+                        ledStatus = ledStates[1] ?: false
                         showLEDNotification(context, if (ledStatus) "on" else "off")
+                        Toast.makeText(
+                            context,
+                            "Sensor ${if (ledStatus) "armed" else "disarmed"}",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
+
                     "Water Plants" -> {
-                        toggleLED(if (ledStatus) "off" else "on") // Toggle LED state
-                        ledStatus = !ledStatus // Update state after the request
+                        val currentState = ledStates[2] ?: false
+                        toggleLED(if (currentState) "off" else "on", 2) // Toggle LED 2
+                        ledStates[2] = !currentState
+                        ledStatus = ledStates[2] ?: false
                         showLEDNotification(context, if (ledStatus) "on" else "off")
+                        Toast.makeText(
+                            context,
+                            "Water pump ${if (ledStatus) "Armed" else "Disarmed"}",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
-                    // Add more actions as necessary
+
+                    "Adjust Temperature" -> {
+                        val currentState = ledStates[3] ?: false
+                        toggleLED(if (currentState) "off" else "on", 3) // Toggle LED 3
+                        ledStates[3] = !currentState
+                        ledStatus = ledStates[3] ?: false
+                        showLEDNotification(context, if (ledStatus) "on" else "off")
+                        Toast.makeText(
+                            context,
+                            "Temperature regulator ${if (ledStatus) "Armed" else "Disarmed"}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+
+                    "Activate Alarm" -> {
+                        val currentState = ledStates[4] ?: false
+                        toggleLED(if (currentState) "off" else "on", 4) // Toggle LED 4
+                        ledStates[4] = !currentState
+                        ledStatus = ledStates[4] ?: false
+                        showLEDNotification(context, if (ledStatus) "on" else "off")
+                        Toast.makeText(
+                            context,
+                            "LED 4 ${if (ledStatus) "On" else "Off"}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 }
             },
         shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(containerColor = cardColor), // Set the card color based on LED status
+        colors = CardDefaults.cardColors(containerColor = cardColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 50.dp)
     ) {
         Box(
@@ -392,7 +443,8 @@ fun QuickActionButton(
 }
 
 
-@Composable
+
+    @Composable
 fun TrendsSection(articles: List<Article>, isLoading: Boolean, errorMessage: String) {
     val lazyListState = rememberLazyListState() // State for LazyRow
     var currentIndex by remember { mutableStateOf(0) } // Track current index for scaling effect
@@ -519,12 +571,12 @@ fun fetchFarmingNews(apiKey: String, callback: (List<Article>?, String?) -> Unit
 @Composable
 fun WeatherScreen(viewModel: WeatherViewModel = WeatherViewModel()) {
     val weatherData by viewModel.weatherData.observeAsState()
+    val location by viewModel.location.observeAsState()
 
     if (weatherData == null) {
         // Display loading or error message when weatherData is null
         Text(text = "No weather data available", color = Color.Red)
     } else {
-
         Card(
             modifier = Modifier
                 .padding(8.dp)
@@ -558,8 +610,6 @@ fun WeatherScreen(viewModel: WeatherViewModel = WeatherViewModel()) {
                             color = Color(0xFF424242)
                         )
                     }
-                    }
-
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -570,11 +620,10 @@ fun WeatherScreen(viewModel: WeatherViewModel = WeatherViewModel()) {
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     weatherData?.let {
-                        WeatherDetailItem(value = "${it.soilTemperature}°C", label = "Soil Temp")
+                        WeatherDetailItem(value = "${it.soilTemperature}°F", label = "Soil Temp")
                         WeatherDetailItem(value = "${it.humidity}%", label = "Humidity")
                         WeatherDetailItem(value = "${it.windSpeed} m/s", label = "Wind")
                         WeatherDetailItem(value = "${it.precipitation} mm", label = "Precipitation")
-                        Log.d("WeatherScreen", "Weather data: $weatherData")
                     }
                 }
 
@@ -585,46 +634,46 @@ fun WeatherScreen(viewModel: WeatherViewModel = WeatherViewModel()) {
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-
+                    weatherData?.let {
                         Text(
-                            text = "${weatherData?.sunrise ?: "--"}°C",
-                            fontSize = 32.sp,
+                            text = "Sunrise: ${it.sunrise}",
+                            fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF424242)
                         )
-                    }
                         Text(
-                            text = weatherData?.sunset ?: "--",
-                            fontSize = 32.sp,
+                            text = "Sunset: ${it.sunset}",
+                            fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF424242)
                         )
-
-                    }
-
                     }
                 }
-
-
-
+            }
+        }
+    }
+}
 
 
 @Composable
 fun WeatherDetailItem(value: String, label: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = value,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = Color(0xFF424242)
-        )
-        Text(
-            text = label,
-            fontSize = 12.sp,
-            color = Color(0xFF757575)
-        )
+        Text(text = value, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+        Text(text = label, fontSize = 14.sp, color = Color.Gray)
     }
 }
+
+fun formatTime(timestamp: Long): String {
+    val date = Date(timestamp * 1000)
+    val format = SimpleDateFormat("h:mm a", Locale.getDefault())
+    return format.format(date)
+}
+
+
+
+
+
+
 
 
 @Composable
@@ -660,27 +709,30 @@ fun navigateTo(context: Context, targetActivity: Class<*>) {
 
 
 
-fun toggleLED(action: String) {
+fun toggleLED(action: String, ledNumber: Int) {
     val api = RetrofitClient.instance
-    val call = api.toggleLED(action)
+    val call = when (ledNumber) {
+        1 -> api.toggleLED1(action)
+        2 -> api.toggleLED2(action)
+        3 -> api.toggleLED3(action)
+        else -> null
+    }
 
-
-
-    call.enqueue(object : retrofit2.Callback<Void> {
-        override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+    call?.enqueue(object : Callback<Void> {
+        override fun onResponse(call: Call<Void>, response: Response<Void>) {
             if (response.isSuccessful) {
-                Log.d("QuickActionButton", "LED toggled successfully")
-
+                Log.d("ToggleLED", "LED $ledNumber toggled $action successfully")
             } else {
-                Log.e("QuickActionButton", "Error response: ${response.code()}")
+                Log.e("ToggleLED", "Error response for LED $ledNumber: ${response.code()}")
             }
         }
 
         override fun onFailure(call: Call<Void>, t: Throwable) {
-            Log.e("QuickActionButton", "Failed to send request: ${t.message}")
+            Log.e("ToggleLED", "Failed to send request for LED $ledNumber: ${t.message}")
         }
     })
 }
+
 fun showLEDNotification(context: Context, action: String) {
     val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -689,7 +741,7 @@ fun showLEDNotification(context: Context, action: String) {
         val channel = NotificationChannel(
             "led_toggle_channel",
             "Sensor arm Notifications",
-            NotificationManager.IMPORTANCE_DEFAULT
+            NotificationManager.IMPORTANCE_HIGH // Make it more prominent
         )
         notificationManager.createNotificationChannel(channel)
     }
@@ -698,20 +750,25 @@ fun showLEDNotification(context: Context, action: String) {
     val notificationContent = if (action == "on") {
         "Sensors Armed"
     } else {
-        "LED has been turned OFF"
+        "Sensors not Armed"
     }
 
-    // Create notification
+    // Create notification with sound, vibration, and priority for visibility
     val notification = NotificationCompat.Builder(context, "led_toggle_channel")
         .setSmallIcon(android.R.drawable.ic_notification_overlay)
-        .setContentTitle("sensor Status")
+        .setContentTitle("Sensor Status")
         .setContentText(notificationContent)
         .setPriority(NotificationCompat.PRIORITY_HIGH)
+        .setDefaults(NotificationCompat.DEFAULT_ALL) // Add sound and vibration
+        .setAutoCancel(true) // Dismiss notification when clicked
+        .setLights(0xFF00FF00.toInt(), 1000, 1000) // Optional: LED lights on notification if supported
         .build()
 
     // Show notification
     notificationManager.notify(0, notification)
 }
+
+
 
 
 

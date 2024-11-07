@@ -21,16 +21,24 @@ material = "1.12.0"
 activity = "1.9.2"
 constraintlayout = "2.1.4"
 material3 = "<latest_version>"
+material3Version = "1.0.0"
 materialVersion = "1.7.5"
 navigationCompose = "2.8.3"
 newsApiJava = "1.0.0"
+roomRuntime = "2.6.1"
 runtimeLivedata = "1.7.5"
 playServicesLocation = "21.3.0"
+googleGmsGoogleServices = "4.4.2"
+firebaseAuth = "23.1.0"
+ui = "1.7.5"
+firebaseDatabaseKtx = "21.0.0"
 
 [libraries]
 accompanist-coil = { module = "com.google.accompanist:accompanist-coil", version.ref = "accompanistCoil" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-material = { module = "androidx.compose.material:material", version.ref = "materialVersion" }
+androidx-material3-v100 = { module = "androidx.compose.material3:material3", version.ref = "material3Version" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -60,8 +68,12 @@ material3 = { module = "androidx.compose.material3:material3", version.ref = "ma
 news-api-java = { module = "com.github.KwabenBerko:News-API-Java", version.ref = "newsApiJava" }
 androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
+ui = { module = "androidx.compose.ui:ui", version.ref = "ui" }
+firebase-database-ktx = { group = "com.google.firebase", name = "firebase-database-ktx", version.ref = "firebaseDatabaseKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
 

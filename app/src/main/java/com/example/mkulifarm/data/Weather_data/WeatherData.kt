@@ -1,5 +1,6 @@
-package com.example.mkulifarm.data
+package com.example.mkulifarm.data.Weather_data
 
+// Example of how the response from OpenWeatherMap is mapped to these classes
 data class WeatherData(
     val temperature: Int,
     val soilTemperature: Int,

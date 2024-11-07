@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     kotlin("plugin.serialization") version "1.9.0"
+    alias(libs.plugins.google.gms.google.services)
 }
 
 
@@ -70,6 +71,8 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.runtime.livedata)
     implementation(libs.play.services.location)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.database.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -94,11 +97,21 @@ dependencies {
     implementation ("io.ktor:ktor-client-serialization:2.3.3") // Ktor Client Serialization
     implementation ("io.ktor:ktor-client-logging:2.3.3") // Ktor Client Logging
     implementation ("io.ktor:ktor-client-cio:2.3.3") // Ktor Client CIO engine
-    implementation (libs.kotlinx.serialization.json.v160) // Kotlinx Serialization
+    implementation (libs.kotlinx.serialization.json.v160)
     implementation("io.ktor:ktor-client-content-negotiation:2.3.3")
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation ("com.squareup.okhttp3:okhttp:4.9.3")
+    implementation ("androidx.security:security-crypto:1.1.0-alpha03")
+    implementation ("androidx.security:security-crypto:1.0.0")
+    implementation (libs.androidx.room.runtime)
+    implementation ("androidx.room:room-ktx:2.4.0")
+    annotationProcessor ("androidx.room:room-compiler:2.4.0")
+    implementation ("org.osmdroid:osmdroid-android:6.1.12")
+
+
+
+
 
 
 }

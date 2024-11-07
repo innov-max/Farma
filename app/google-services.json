@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "44649163155",
+    "project_id": "farmon-8c331",
+    "storage_bucket": "farmon-8c331.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:44649163155:android:492175d1edaa2be39ea066",
+        "android_client_info": {
+          "package_name": "com.example.mkulifarm"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBxAEfS2YRjLAi1KMFIyGkFaVBqmXySunE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

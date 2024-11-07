@@ -61,7 +61,7 @@ fun Splashscreen() {
         delay(5000L) // 5 seconds delay
         if (isLoggedIn.value) {
             // Start the Dashboard activity
-            val intent = Intent(context, Dashboard::class.java)
+            val intent = Intent(context, login::class.java)
             context.startActivity(intent)
             // Close the Splash screen to prevent navigating back to it
             (context as? ComponentActivity)?.finish()

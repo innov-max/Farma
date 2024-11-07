@@ -7,6 +7,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.LiveData
+import com.example.mkulifarm.data.Weather_data.WeatherData
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.Date
@@ -21,13 +22,14 @@ class WeatherViewModel : ViewModel() {
     val location: LiveData<String> = _location
 
     init {
-        // Set initial location
+        // Set initial location (latitude and longitude)
         val initialLatitude = -1.3088851164172204
         val initialLongitude = 36.81208148298125
         val initialLocation = getLocationName(initialLatitude, initialLongitude)
         _location.value = initialLocation // Set the location to the initial one
 
-        // Start periodic updates
+        // Fetch weather data initially and start periodic updates
+        fetchWeatherData(initialLatitude, initialLongitude)
         startPeriodicWeatherUpdates(latitude = initialLatitude, longitude = initialLongitude)
     }
 
@@ -44,7 +46,7 @@ class WeatherViewModel : ViewModel() {
     private fun fetchWeatherData(latitude: Double, longitude: Double) {
         viewModelScope.launch {
             try {
-                // Making the API call
+                // Making the API call to the OpenWeatherMap API
                 val response = WeatherRetrofitClient.instance.getWeatherData(
                     latitude = latitude,
                     longitude = longitude,
@@ -59,16 +61,15 @@ class WeatherViewModel : ViewModel() {
                         // Update weather data
                         _weatherData.value = WeatherData(
                             temperature = it.main.temp.toInt(),
-                            soilTemperature = it.main.temp_min.toInt(), // Corrected property name
+                            soilTemperature = it.main.temp_min.toInt(), // Can be used for soil temp if needed
                             humidity = it.main.humidity,
                             windSpeed = it.wind.speed.toInt(),
-                            precipitation = 0, // Placeholder
+                            precipitation = 0, // Placeholder (you can update it based on API response if available)
                             sunrise = sunriseTime,
                             sunset = sunsetTime
                         )
-                        Log.d("WeatherViewModel", "Weather data fetched successfully")
 
-                        // Set location name (You can improve this if you want more details)
+                        // Set location name
                         val locationName = getLocationName(latitude, longitude)
                         _location.value = locationName
                     }
@@ -84,7 +85,8 @@ class WeatherViewModel : ViewModel() {
     }
 
     private fun getLocationName(latitude: Double, longitude: Double): String {
-        // For simplicity, this is a placeholder method. You can use reverse geocoding to get the location name.
+        // For simplicity, you can use reverse geocoding here if you want a location name,
+        // or just return the latitude/longitude as a string.
         return "Latitude: $latitude, Longitude: $longitude"
     }
 
@@ -94,3 +96,4 @@ class WeatherViewModel : ViewModel() {
         return format.format(date)
     }
 }
+

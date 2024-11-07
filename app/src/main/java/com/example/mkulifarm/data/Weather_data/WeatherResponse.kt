@@ -1,4 +1,4 @@
-package com.example.mkulifarm.data
+package com.example.mkulifarm.data.Weather_data
 
 data class WeatherResponse(
     val main: Main,
