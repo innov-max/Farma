@@ -60,10 +60,10 @@ Sit back, sip your *chai*, and let *Farma* do all the hard work. Your shamba is 
 
 ## **Let’s Connect, We’re Not Just a Farm App, We’re Your Farm Fam** 💬
 
-- **GitHub**: [Farma Repo](#)
-- **Email**: farma@appsupport.com
+- **GitHub**: [Farma](https://github.com/innov-max/Farma)
+- **Email**: LOL get a life
 - **Twitter**: [@FarmaApp](#)
 
 ---
 
-Bro, do you want to keep slaving away under the sun or level up your farm game with some real *techy* farming? If you’re tired of running after your crops like they’re your *ex*, then it’s time to upgrade with *Farma*—because we’re bringing *shamba life* into the 21st century. 🌾
+# Bro, do you want to keep slaving away under the sun or level up your farm game with some real *techy* farming? If you’re tired of running after your crops like they’re your *ex*, then it’s time to upgrade with *Farma*—because we’re bringing *shamba life* into the 21st century. 🌾
