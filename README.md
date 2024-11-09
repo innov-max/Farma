@@ -1,6 +1,6 @@
 # **Farma: The Ultimate Shamba App for Hustlers (si Zakayo Though) and Smart Farmers!** 🚜🌱
 
-## **Sasa! Welcome to Farma — The App That Will Make Your Shamba Look Like a Tech Billionaire’s Backyard!** 🇰🇪
+## ** Waaa The App That Will Make Your Shamba Look Like a Tech Billionaire’s Backyard!** 🇰🇪
 
 Bro, if you’re tired of running up and down your *shamba* like you’re chasing after *mtu wa boda boda*, then you’ve come to the right place. *Farma* is here to *tech-ify* your farming life. We’re talking about remote control for your irrigation, temperature, moisture, and everything in between. No more stress, no more *kupiga kazi* like it’s 2002. With *Farma*, you can be at your favorite *nyama choma joint* and still know whether your tomatoes are *on point* or about to *kufa* from lack of water.
 
