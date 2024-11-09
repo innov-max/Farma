@@ -1,6 +1,6 @@
 # **Farma: Your Smart Shamba Assistant!** 🚜🌱
 
-## **Jambo! Welcome to Farma—The Shamba App That Knows More Than Your Auntie's Gossip!** 🇰🇪
+## **SSUP! Here's Farma—The Shamba App That Knows More Than Your Auntie's Gossip!** 🇰🇪
 
 So, you’ve got a shamba but no time to babysit it like it’s a newborn? Enter *Farma*! It’s like giving your farm a PhD in tech, minus the drama. While you’re chilling at home or vibing with the crew, Farma is on the ground keeping an eye on your crops—no sweat, no tears, just smart farming.
 
