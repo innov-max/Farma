@@ -108,6 +108,7 @@ dependencies {
     implementation ("androidx.room:room-ktx:2.4.0")
     annotationProcessor ("androidx.room:room-compiler:2.4.0")
     implementation ("org.osmdroid:osmdroid-android:6.1.12")
+    implementation ("androidx.compose.material3:material3:1.0.0")
 
 
 

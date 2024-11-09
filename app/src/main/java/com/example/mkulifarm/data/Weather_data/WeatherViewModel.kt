@@ -7,6 +7,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.LiveData
+
 import com.example.mkulifarm.data.Weather_data.WeatherData
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -44,6 +45,8 @@ class WeatherViewModel : ViewModel() {
     }
 
     private fun fetchWeatherData(latitude: Double, longitude: Double) {
+
+
         viewModelScope.launch {
             try {
                 // Making the API call to the OpenWeatherMap API
@@ -95,5 +98,8 @@ class WeatherViewModel : ViewModel() {
         val format = SimpleDateFormat("h:mm a", Locale.getDefault())
         return format.format(date)
     }
+
+
+
 }
 

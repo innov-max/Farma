@@ -8,5 +8,7 @@ data class WeatherData(
     val windSpeed: Int,
     val precipitation: Int,
     val sunrise: String,
-    val sunset: String
+    val sunset: String,
+
+
 )

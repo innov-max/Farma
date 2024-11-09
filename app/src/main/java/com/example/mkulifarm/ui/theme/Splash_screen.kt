@@ -23,9 +23,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
@@ -61,7 +58,7 @@ fun Splashscreen() {
         delay(5000L) // 5 seconds delay
         if (isLoggedIn.value) {
             // Start the Dashboard activity
-            val intent = Intent(context, login::class.java)
+            val intent = Intent(context, Dashboard::class.java)
             context.startActivity(intent)
             // Close the Splash screen to prevent navigating back to it
             (context as? ComponentActivity)?.finish()
@@ -87,7 +84,7 @@ fun SplashScreenContent() {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             // Logo or branding icon
-            val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.temp)) // Adjust with your animation file
+            val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.farm)) // Adjust with your animation file
 
             LottieAnimation(
                 composition,

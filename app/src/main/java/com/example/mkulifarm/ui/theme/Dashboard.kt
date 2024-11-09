@@ -21,9 +21,7 @@ import androidx.compose.foundation.background
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -38,6 +36,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
@@ -52,6 +51,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -60,15 +60,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberImagePainter
 import com.airbnb.lottie.compose.*
 import com.example.mkulifarm.R
 import com.example.mkulifarm.data.NewsResponse
 import com.example.mkulifarm.data.RetrofitClient
 import com.example.mkulifarm.data.RetrofitInstance
+import com.example.mkulifarm.data.SoilData.SoilData
+
 import com.example.mkulifarm.data.WeatherViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.firebase.FirebaseApp
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.delay
 import retrofit2.Call
 import retrofit2.Callback
@@ -80,9 +88,6 @@ import java.util.Locale
 
 
 class Dashboard : ComponentActivity() {
-
-
-
      val apiKey = "edd9318bcadb4fa295854bb3f810b053"
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
@@ -93,6 +98,7 @@ class Dashboard : ComponentActivity() {
 
         setContent {
             DashboardScreen(apiKey)
+
         }
     }
     fun getCurrentLocation(onLocationRetrieved: (String) -> Unit) {
@@ -140,17 +146,20 @@ fun DashboardScreen(apiKey: String) {
     var errorMessage by remember { mutableStateOf("") }
 
 
+
+
     // Fetch articles when the DashboardScreen is first composed
 
     LaunchedEffect(Unit) {
+
         fetchFarmingNews(apiKey) { fetchedArticles, error ->
             articles = fetchedArticles ?: emptyList()
             Log.d("DashboardScreen", "Fetched ${articles.size} articles")
             isLoading = false
             errorMessage = error ?: ""
         }
-    }
 
+    }
 
 
     Scaffold(
@@ -169,13 +178,19 @@ fun DashboardScreen(apiKey: String) {
         ) {
             TopBar()
             when (selectedTab) {
+
+
                 0 -> MetricsSection()
                 1 -> QuickActionsSection()
                 2 -> TrendsSection(articles, isLoading, errorMessage)
+
+
             }
+
             QuickActionsSection()
             TrendsSection(articles, isLoading, errorMessage)
             WeatherScreen()
+
 
 
 
@@ -195,9 +210,9 @@ fun TopBar() {
             painter = painterResource(id = R.drawable.profile),
             contentDescription = "App Logo",
             modifier = Modifier
-                .size(55.dp)
+                .size(60.dp)
                 .clip(CircleShape)
-                .padding(horizontal = 10.dp)
+                .padding(horizontal = 5.dp)
 
         )
         Column(
@@ -206,16 +221,16 @@ fun TopBar() {
             ) {
 
             Text(
-                text = "Farmacare", fontSize = 34.sp,
+                text = "Farminikia", fontSize = 34.sp,
                 color = Color.Black,
             )
-            /*val locationName by remember { mutableStateOf("...") }
+            val locationName by remember { mutableStateOf("...") }
             Text(
                 text = locationName,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
-            )*/
+            )
         }
 
         Column(
@@ -238,9 +253,6 @@ fun TopBar() {
                 Icon(Icons.Filled.Settings, contentDescription = "Settings")
             }
 
-
-
-
             }
 
 
@@ -251,26 +263,69 @@ fun TopBar() {
 
 @Composable
 fun MetricsSection() {
+
+    val database = FirebaseDatabase.getInstance()
+    val soilRef = database.getReference("soilData") // Reference to your soil data in Firebase
+
+    // State variables for storing soil data
+    var soilTemp by remember { mutableStateOf<String>("Loading...") }
+    var humidity by remember { mutableStateOf<String>("Loading...") }
+    var soilMoisture by remember { mutableStateOf<String>("Loading...") }
+
+    // Fetch data from Firebase
+    LaunchedEffect(Unit) {
+
+        soilRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+
+                val soilData = snapshot.getValue(SoilData::class.java)
+                if (soilData != null) {
+                    // Update state with values from Firebase
+                    soilTemp = soilData.soilTemperature?.toString() ?: "N/A"
+                    humidity = soilData.soilMoisture?.toString() ?: "N/A"
+                    soilMoisture = soilData.soilHumidity?.toString() ?: "N/A"
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Handle possible error
+                soilTemp = "Error"
+                humidity = "Error"
+                soilMoisture = "Error"
+            }
+        })
+    }
+
     Column(
         modifier = Modifier
             .padding(vertical = 10.dp)
             .fillMaxWidth()
             .background(Color.White, RoundedCornerShape(8.dp))
             .padding(16.dp)
-
     ) {
         Text("Current Conditions", fontSize = 18.sp, color = Color.DarkGray)
         Spacer(modifier = Modifier.height(8.dp))
 
-
-        // Metrics row displaying temperature, humidity, and soil moisture
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            MetricCard(title = "Temperature", value = "25°C", lottieFile = R.raw.temp.toString())
-            MetricCard(title = "Humidity", value = "60%", lottieFile = R.raw.water.toString())
-            MetricCard(title = "Soil Moisture", value = "45%", lottieFile = "soil_moisture.json")
+            // Display the data fetched from Firebase
+            MetricCard(
+                title = "Soil Temp",
+                value = soilTemp,
+                lottieFile = R.raw.temp.toString()
+            )
+            MetricCard(
+                title = "Humidity",
+                value = humidity,
+                lottieFile = R.raw.water.toString()
+            )
+            MetricCard(
+                title = "Soil Moisture",
+                value = soilMoisture,
+                lottieFile = "soil_moisture.json"
+            )
         }
     }
 }
@@ -278,8 +333,10 @@ fun MetricsSection() {
 @Composable
 fun MetricCard(title: String, value: String, lottieFile: String) {
     // Card containing a metric title, value, and Lottie animation as background
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.temp))
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.water))
     val progress by animateLottieCompositionAsState(composition)
+
+
 
     Card(
         modifier = Modifier
@@ -377,11 +434,13 @@ fun QuickActionButton(
                         ledStates[1] = !currentState
                         ledStatus = ledStates[1] ?: false
                         showLEDNotification(context, if (ledStatus) "on" else "off")
-                        Toast.makeText(
-                            context,
-                            "Sensor ${if (ledStatus) "armed" else "disarmed"}",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Toast
+                            .makeText(
+                                context,
+                                "Sensor ${if (ledStatus) "armed" else "disarmed"}",
+                                Toast.LENGTH_SHORT
+                            )
+                            .show()
                     }
 
                     "Water Plants" -> {
@@ -390,11 +449,13 @@ fun QuickActionButton(
                         ledStates[2] = !currentState
                         ledStatus = ledStates[2] ?: false
                         showLEDNotification(context, if (ledStatus) "on" else "off")
-                        Toast.makeText(
-                            context,
-                            "Water pump ${if (ledStatus) "Armed" else "Disarmed"}",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Toast
+                            .makeText(
+                                context,
+                                "Water pump ${if (ledStatus) "Armed" else "Disarmed"}",
+                                Toast.LENGTH_SHORT
+                            )
+                            .show()
                     }
 
                     "Adjust Temperature" -> {
@@ -403,11 +464,13 @@ fun QuickActionButton(
                         ledStates[3] = !currentState
                         ledStatus = ledStates[3] ?: false
                         showLEDNotification(context, if (ledStatus) "on" else "off")
-                        Toast.makeText(
-                            context,
-                            "Temperature regulator ${if (ledStatus) "Armed" else "Disarmed"}",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Toast
+                            .makeText(
+                                context,
+                                "Temperature regulator ${if (ledStatus) "Armed" else "Disarmed"}",
+                                Toast.LENGTH_SHORT
+                            )
+                            .show()
                     }
 
                     "Activate Alarm" -> {
@@ -416,11 +479,13 @@ fun QuickActionButton(
                         ledStates[4] = !currentState
                         ledStatus = ledStates[4] ?: false
                         showLEDNotification(context, if (ledStatus) "on" else "off")
-                        Toast.makeText(
-                            context,
-                            "LED 4 ${if (ledStatus) "On" else "Off"}",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Toast
+                            .makeText(
+                                context,
+                                "LED 4 ${if (ledStatus) "On" else "Off"}",
+                                Toast.LENGTH_SHORT
+                            )
+                            .show()
                     }
                 }
             },
@@ -508,7 +573,7 @@ fun ArticleItem(article: Article, isFocused: Boolean) {
                 scaleY = scale
             )
             .background(Color.White, shape = RoundedCornerShape(8.dp))
-            .padding(8.dp),
+            .padding(8.dp), 
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (article.imageUrl != null) {
@@ -655,6 +720,8 @@ fun WeatherScreen(viewModel: WeatherViewModel = WeatherViewModel()) {
 }
 
 
+
+
 @Composable
 fun WeatherDetailItem(value: String, label: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -781,5 +848,7 @@ fun showLEDNotification(context: Context, action: String) {
 @Composable
 fun PreviewDashboardScreen() {
     DashboardScreen(apiKey = "edd9318bcadb4fa295854bb3f810b053")
+
+
 }
 

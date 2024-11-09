@@ -1,7 +1,9 @@
 package com.example.mkulifarm.ui.theme
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -16,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -57,6 +60,7 @@ fun LoginRegisterScreen(
     var password by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -69,15 +73,15 @@ fun LoginRegisterScreen(
 
         Box(
             modifier = Modifier
-                .size(120.dp)
+                .size(240.dp)
                 .clip(CircleShape)
                 .paddingFromBaseline(top = 40.dp, bottom = 10.dp)// Optional border
         ) {
-            val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.temp)) // Adjust with your animation file
+            val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.farm)) // Adjust with your animation file
             LottieAnimation(
                 composition,
                 iterations = LottieConstants.IterateForever,
-                modifier = Modifier.size(120.dp)
+                modifier = Modifier.size(2400.dp)
                     .padding(50.dp),
 
             )
@@ -85,7 +89,7 @@ fun LoginRegisterScreen(
         // Customized Tab Row for Login/Register toggle
         TabRow(
             selectedTabIndex = selectedTabIndex,
-            containerColor = Color(0xFF00BFA5),
+            containerColor = Color(0xFF8BC34A),
             contentColor = Color.White
         ) {
             Tab(
@@ -110,7 +114,15 @@ fun LoginRegisterScreen(
                 onPasswordChange = { password = it },
                 onLoginClick = {
                     authHelper.loginUser(email, password,
-                        onSuccess = { navController.navigate("home") },
+                        onSuccess = {  val intent = Intent(context, Dashboard::class.java)
+                            context.startActivity(intent)
+                            Toast.makeText(
+                                context,
+                                "Login sucessful welcome back",
+                                Toast.LENGTH_SHORT
+                            ).show()
+
+                                    },
                         onFailure = { errorMessage = it }
                     )
                 },
@@ -126,7 +138,15 @@ fun LoginRegisterScreen(
                 onPasswordChange = { password = it },
                 onRegisterClick = {
                     authHelper.registerUser(email, password,
-                        onSuccess = { navController.navigate("home") },
+                        onSuccess = { val intent = Intent(context, Dashboard::class.java)
+                            context.startActivity(intent)
+                            Toast.makeText(
+                                context,
+                                "Registration succesful Welcome",
+                                Toast.LENGTH_SHORT
+                            ).show()
+
+                                    },
                         onFailure = { errorMessage = it }
                     )
                 },
@@ -154,14 +174,14 @@ fun LoginRegisterScreen(
                 Icon(
                     painter = painterResource(id = R.drawable.facebook),
                     contentDescription = "Facebook",
-                    tint = Color(0xFF1877F2)
+
                 )
             }
             IconButton(onClick = { /* Google login */ }) {
                 Icon(
                     painter = painterResource(id = R.drawable.google),
                     contentDescription = "Google",
-                    tint = Color(0xFFDB4437)
+
                 )
             }
         }
@@ -211,7 +231,7 @@ fun LoginForm(
                 .padding(50.dp)
                 .height(50.dp),
 
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00BFA5)),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8BC34A)),
             shape = RoundedCornerShape(12.dp)
         ) {
             Text("Login", fontSize = 16.sp, color = Color.White)
@@ -276,7 +296,7 @@ fun RegisterForm(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00BFA5)),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8BC34A)),
             shape = RoundedCornerShape(12.dp)
         ) {
             Text("Register", fontSize = 16.sp, color = Color.White)
