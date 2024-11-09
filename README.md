@@ -1,4 +1,4 @@
-# **Farma: The Ultimate Shamba App for Hustlers and Smart Farmers!** 🚜🌱
+# **Farma: The Ultimate Shamba App for Hustlers (si Zakayo Though) and Smart Farmers!** 🚜🌱
 
 ## **Sasa! Welcome to Farma — The App That Will Make Your Shamba Look Like a Tech Billionaire’s Backyard!** 🇰🇪
 
