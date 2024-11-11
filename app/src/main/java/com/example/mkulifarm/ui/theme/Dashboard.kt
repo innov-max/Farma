@@ -180,13 +180,13 @@ fun DashboardScreen(apiKey: String) {
             when (selectedTab) {
 
 
-                0 -> MetricsSection()
+              /**  0 -> MetricsSection()
                 1 -> QuickActionsSection()
-                2 -> TrendsSection(articles, isLoading, errorMessage)
+                2 -> TrendsSection(articles, isLoading, errorMessage)**/
 
 
             }
-
+            MetricsSection()
             QuickActionsSection()
             TrendsSection(articles, isLoading, errorMessage)
             WeatherScreen()
@@ -264,17 +264,15 @@ fun TopBar() {
 @Composable
 fun MetricsSection() {
 
-    val database = FirebaseDatabase.getInstance()
-    val soilRef = database.getReference("soilData") // Reference to your soil data in Firebase
-
     // State variables for storing soil data
-    var soilTemp by remember { mutableStateOf<String>("Loading...") }
-    var humidity by remember { mutableStateOf<String>("Loading...") }
-    var soilMoisture by remember { mutableStateOf<String>("Loading...") }
+    var soilTemp by remember { mutableStateOf("Loading...") }
+    var humidity by remember { mutableStateOf("Loading...") }
+    var soilMoisture by remember { mutableStateOf("Loading...") }
 
     // Fetch data from Firebase
     LaunchedEffect(Unit) {
-
+        val database = FirebaseDatabase.getInstance()
+        val soilRef = database.getReference("soilData")
         soilRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
 
@@ -324,7 +322,7 @@ fun MetricsSection() {
             MetricCard(
                 title = "Soil Moisture",
                 value = soilMoisture,
-                lottieFile = "soil_moisture.json"
+                lottieFile = R.raw.water.toString()
             )
         }
     }
@@ -332,7 +330,6 @@ fun MetricsSection() {
 
 @Composable
 fun MetricCard(title: String, value: String, lottieFile: String) {
-    // Card containing a metric title, value, and Lottie animation as background
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.water))
     val progress by animateLottieCompositionAsState(composition)
 
@@ -346,6 +343,15 @@ fun MetricCard(title: String, value: String, lottieFile: String) {
     ) {
         Box {
             // Display Lottie animation in the background
+            Column(
+                modifier = Modifier.padding(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(text = title, fontSize = 10.sp, color = Color.Gray)
+                Text(text = value, fontSize = 15.sp, color = Color.Black)
+            }
+
             LottieAnimation(
                 composition,
                 progress,
@@ -354,14 +360,6 @@ fun MetricCard(title: String, value: String, lottieFile: String) {
                     .padding(vertical = 10.dp)
             )
 
-            Column(
-                modifier = Modifier.padding(8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(text = title, fontSize = 10.sp, color = Color.Gray)
-                Text(text = value, fontSize = 20.sp, color = Color.Black)
-            }
 
         }
     }
@@ -669,7 +667,7 @@ fun WeatherScreen(viewModel: WeatherViewModel = WeatherViewModel()) {
                     Spacer(modifier = Modifier.width(8.dp))
                     weatherData?.let {
                         Text(
-                            text = "${weatherData?.temperature ?: "--"}°C",
+                            text = "${weatherData?.temperature ?: "--"}°F",
                             fontSize = 32.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF424242)
@@ -735,12 +733,6 @@ fun formatTime(timestamp: Long): String {
     val format = SimpleDateFormat("h:mm a", Locale.getDefault())
     return format.format(date)
 }
-
-
-
-
-
-
 
 
 @Composable
