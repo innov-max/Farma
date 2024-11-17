@@ -4,9 +4,7 @@ import com.example.mkulifarm.data.MetricData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-class MockMetricsViewModel : MetricsViewModel(null) {
-
-    // Provide dummy data for preview purposes
+class MockMetricsViewModel(mockData: List<MetricData>) : MetricsViewModel() {
     override val metrics: StateFlow<List<MetricData>> = MutableStateFlow(
         listOf(
             MetricData("Water", 200f, "L"),

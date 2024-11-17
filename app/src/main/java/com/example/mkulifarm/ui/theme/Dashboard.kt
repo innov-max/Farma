@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Geocoder
+import android.media.Image
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -46,11 +47,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -167,7 +170,7 @@ fun DashboardScreen(apiKey: String) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF1F1F1))
+                .background(Color(0xFFF1F5EC))
                 .padding(paddingValues)
                 .padding(6.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -199,11 +202,16 @@ fun TopBar() {
     val context = LocalContext.current
     // Top bar containing logo, title, and action icons
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth()
+            .background(
+                Brush.linearGradient(
+                    colors = listOf(Color(0xFF00BCD4), Color(0xFF8BC34A))
+                )
+            ),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Image(
-            painter = painterResource(id = R.drawable.profile),
+            painter = painterResource(id = R.drawable.farmer),
             contentDescription = "App Logo",
             modifier = Modifier
                 .size(60.dp)
@@ -308,7 +316,9 @@ fun MetricsSection() {
             MetricCard(
                 title = "Soil Temp",
                 value = soilTemp,
-                image = painterResource(id = R.drawable.moisture))
+                image = painterResource(id = R.drawable.moisture)
+
+            )
 
             MetricCard(
                 title = "Humidity",
@@ -320,22 +330,43 @@ fun MetricsSection() {
                 value = soilMoisture,
                 image = painterResource(id = R.drawable.moisture)
 
+
             )
         }
     }
 }
 
 @Composable
-fun MetricCard(title: String, value: String, image: Painter) {
+fun MetricCard(title: String,
+               value: String,
+               image: Painter,
+               cardBackgroundColor: Color = Color.White
+
+
+) {
 
     Card(
         modifier = Modifier
             .size(100.dp)
+            .background(colorResource(id = R.color.white))
             .padding(4.dp),
-        shape = RoundedCornerShape(8.dp)
+        shape = RoundedCornerShape(8.dp) ,
+        colors = CardDefaults.cardColors(containerColor = cardBackgroundColor)
+
     ) {
-        Box {
+        Box(
+
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(Color(0xFF00BCD4), Color(0xFF8BC34A)) // Set gradient colors
+                    )
+                )
+        ) {
+
             // Display Lottie animation in the background
+
             Column(
                 modifier = Modifier.padding(8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -344,14 +375,6 @@ fun MetricCard(title: String, value: String, image: Painter) {
                 Text(text = title, fontSize = 10.sp, color = Color.Gray)
                 Text(text = value, fontSize = 15.sp, color = Color.Black)
             }
-            Image(
-                painter = image,
-                contentDescription = null, // You can add a description if needed for accessibility
-                modifier = Modifier
-                    .size(24.dp)
-                    .padding(top = 4.dp)
-            )
-
 
 
         }
@@ -409,8 +432,16 @@ fun QuickActionButton(
 
     val context = LocalContext.current
 
-// Determine the card color based on LED state
-    val cardColor = if (ledStatus) Color(0xFFFF5722) else Color(0xFF8BC34A)
+    // Determine the gradient based on LED state
+    val gradient = if (ledStatus) {
+        Brush.linearGradient(
+            colors = listOf(Color(0xFFFF5722), Color(0xFFFFA726)) // Red-Orange gradient for ON state
+        )
+    } else {
+        Brush.linearGradient(
+            colors = listOf(Color(0xFF8BC34A), Color(0xFF4CAF50)) // Green gradient for OFF state
+        )
+    }
 
     Card(
         modifier = Modifier
@@ -480,22 +511,25 @@ fun QuickActionButton(
                 }
             },
         shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(containerColor = cardColor),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent), // Transparent container
         elevation = CardDefaults.cardElevation(defaultElevation = 50.dp)
     ) {
         Box(
             contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .background(gradient) // Apply the gradient background dynamically
         ) {
             Text(
                 text = label,
                 fontSize = 10.sp,
-                color = Color.DarkGray,
+                color = Color.White, // Text color adjusted for better contrast
                 modifier = Modifier.align(Alignment.Center)
             )
         }
     }
 }
+
 
 
 
@@ -518,10 +552,15 @@ fun TrendsSection(articles: List<Article>, isLoading: Boolean, errorMessage: Str
         modifier = Modifier
             .fillMaxWidth()
             .height(240.dp)
+            .background(colorResource(id = R.color.white))
             .padding(8.dp),
-        shape = RoundedCornerShape(8.dp)
+        shape = RoundedCornerShape(10.dp)
     ) {
-        Column {
+        Column(
+            modifier = Modifier
+                .background(colorResource(id = R.color.white))
+
+        ) {
             Text("Farming News", fontSize = 16.sp, color = Color.Gray, modifier = Modifier.padding(8.dp))
 
             if (isLoading) {
@@ -635,12 +674,13 @@ fun WeatherScreen(viewModel: WeatherViewModel = WeatherViewModel()) {
         Card(
             modifier = Modifier
                 .padding(8.dp)
-                .fillMaxWidth(),
+                .fillMaxSize(),
             shape = RoundedCornerShape(16.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 50.dp)
         ) {
             Column(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(16.dp)
+                    .fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -649,6 +689,10 @@ fun WeatherScreen(viewModel: WeatherViewModel = WeatherViewModel()) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center,
                     modifier = Modifier.fillMaxWidth()
+
+
+
+
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.cloud), // Replace with actual weather icon
@@ -729,8 +773,22 @@ fun formatTime(timestamp: Long): String {
 
 @Composable
 fun BottomNavigationBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
+
+    val context = LocalContext.current
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(75.dp)
+            .padding(10.dp)
+            .background(
+                Brush.linearGradient(
+                    colors = listOf(Color(0xFF00BCD4), Color(0xFF8BC34A)) // Set gradient colors
+                )
+            )
+    )
     NavigationBar(
-        containerColor = Color.White,
+        containerColor = Color.Transparent,
         contentColor = Color.DarkGray
     ) {
         BottomNavigationItem(
@@ -743,7 +801,11 @@ fun BottomNavigationBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
             icon = { Icon(Icons.Filled.Refresh, contentDescription = "Actions") },
             label = { Text("Actions") },
             selected = selectedTab == 1,
-            onClick = { onTabSelected(1) }
+            onClick = {
+
+                val intent = Intent(context, DataAnalysis::class.java)
+                context.startActivity(intent)
+            }
         )
         BottomNavigationItem(
             icon = { Icon(Icons.Filled.Settings, contentDescription = "Settings") },
