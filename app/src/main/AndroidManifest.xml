@@ -19,6 +19,9 @@
         android:theme="@style/Theme.MKuliFarm"
         tools:targetApi="31">
         <activity
+            android:name=".ui.theme.DataAnalysis"
+            android:exported="false" />
+        <activity
             android:name=".ui.theme.login"
             android:exported="false" />
         <activity

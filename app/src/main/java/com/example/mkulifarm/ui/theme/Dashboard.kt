@@ -36,7 +36,6 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
@@ -49,9 +48,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -60,9 +59,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberImagePainter
-import com.airbnb.lottie.compose.*
 import com.example.mkulifarm.R
 import com.example.mkulifarm.data.NewsResponse
 import com.example.mkulifarm.data.RetrofitClient
@@ -72,7 +69,6 @@ import com.example.mkulifarm.data.SoilData.SoilData
 import com.example.mkulifarm.data.WeatherViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.firebase.FirebaseApp
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -312,28 +308,25 @@ fun MetricsSection() {
             MetricCard(
                 title = "Soil Temp",
                 value = soilTemp,
-                lottieFile = R.raw.temp.toString()
-            )
+                image = painterResource(id = R.drawable.moisture))
+
             MetricCard(
                 title = "Humidity",
                 value = humidity,
-                lottieFile = R.raw.water.toString()
+                image = painterResource(id = R.drawable.moisture)
             )
             MetricCard(
                 title = "Soil Moisture",
                 value = soilMoisture,
-                lottieFile = R.raw.water.toString()
+                image = painterResource(id = R.drawable.moisture)
+
             )
         }
     }
 }
 
 @Composable
-fun MetricCard(title: String, value: String, lottieFile: String) {
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.water))
-    val progress by animateLottieCompositionAsState(composition)
-
-
+fun MetricCard(title: String, value: String, image: Painter) {
 
     Card(
         modifier = Modifier
@@ -351,14 +344,14 @@ fun MetricCard(title: String, value: String, lottieFile: String) {
                 Text(text = title, fontSize = 10.sp, color = Color.Gray)
                 Text(text = value, fontSize = 15.sp, color = Color.Black)
             }
-
-            LottieAnimation(
-                composition,
-                progress,
+            Image(
+                painter = image,
+                contentDescription = null, // You can add a description if needed for accessibility
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(vertical = 10.dp)
+                    .size(24.dp)
+                    .padding(top = 4.dp)
             )
+
 
 
         }
@@ -455,7 +448,6 @@ fun QuickActionButton(
                             )
                             .show()
                     }
-
                     "Adjust Temperature" -> {
                         val currentState = ledStates[3] ?: false
                         toggleLED(if (currentState) "off" else "on", 3) // Toggle LED 3
@@ -788,6 +780,7 @@ fun toggleLED(action: String, ledNumber: Int) {
 
         override fun onFailure(call: Call<Void>, t: Throwable) {
             Log.e("ToggleLED", "Failed to send request for LED $ledNumber: ${t.message}")
+
         }
     })
 }
