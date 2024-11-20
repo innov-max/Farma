@@ -1,8 +1,10 @@
 package com.example.mkulifarm.data.room_backup
 
+import android.content.Context
 import androidx.room.Database
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Room
 import androidx.room.RoomDatabase
 
 interface FarmerDao {
@@ -11,9 +13,4 @@ interface FarmerDao {
 
     @Query("SELECT * FROM farmer_table")
     suspend fun getAllFarmers(): List<Farmer>
-}
-
-@Database(entities = [Farmer::class], version = 1, exportSchema = false)
-abstract class AppDatabase : RoomDatabase() {
-    abstract fun farmerDao(): FarmerDao
 }

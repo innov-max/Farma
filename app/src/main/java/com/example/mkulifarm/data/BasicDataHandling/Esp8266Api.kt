@@ -1,9 +1,8 @@
-package com.example.mkulifarm.data
+package com.example.mkulifarm.data.BasicDataHandling
 
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Path
-import retrofit2.http.Query
 
 interface Esp8266Api {
     @GET("led1/{action}")

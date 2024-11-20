@@ -1,3 +1,5 @@
+package com.example.mkulifarm.data.BasicDataHandling
+
 import kotlinx.serialization.Serializable
 
 @Serializable

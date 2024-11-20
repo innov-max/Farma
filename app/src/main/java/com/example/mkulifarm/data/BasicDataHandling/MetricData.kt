@@ -1,4 +1,4 @@
-package com.example.mkulifarm.data
+package com.example.mkulifarm.data.BasicDataHandling
 
 class MetricData (
 

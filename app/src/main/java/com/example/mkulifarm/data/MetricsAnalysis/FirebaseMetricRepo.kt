@@ -1,11 +1,7 @@
 package com.example.mkulifarm.data.MetricsAnalysis
 
-import com.example.mkulifarm.data.MetricData
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
+import com.example.mkulifarm.data.BasicDataHandling.MetricData
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 
 import android.content.Context

@@ -1,6 +1,6 @@
 package com.example.mkulifarm.data.MetricsAnalysis
 
-import com.example.mkulifarm.data.MetricData
+import com.example.mkulifarm.data.BasicDataHandling.MetricData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 

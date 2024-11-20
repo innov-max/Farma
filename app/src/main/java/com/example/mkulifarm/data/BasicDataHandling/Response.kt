@@ -1,12 +1,12 @@
-package com.example.mkulifarm.data
+package com.example.mkulifarm.data.BasicDataHandling
 
 data class NewsResponse(
     val status: String,
     val totalResults: Int,
-    val articles: List<Article>
+    val articles: List<Articles>
 )
 
-data class Article(
+data class Articles(
     val source: Source,
     val author: String?,
     val title: String,

@@ -1,4 +1,4 @@
-package com.example.mkulifarm.data
+package com.example.mkulifarm.data.BasicDataHandling
 import com.example.mkulifarm.data.Weather_data.WeatherApiService
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

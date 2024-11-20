@@ -3,7 +3,7 @@ package com.example.mkulifarm.data.MetricsAnalysis
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.mkulifarm.data.MetricData
+import com.example.mkulifarm.data.BasicDataHandling.MetricData
 import com.google.firebase.FirebaseApp
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

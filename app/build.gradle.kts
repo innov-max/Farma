@@ -105,11 +105,12 @@ dependencies {
     implementation ("androidx.security:security-crypto:1.1.0-alpha03")
     implementation ("androidx.security:security-crypto:1.0.0")
     implementation (libs.androidx.room.runtime)
-    implementation ("androidx.room:room-ktx:2.4.0")
+    implementation ("androidx.room:room-ktx:2.5.0")
     annotationProcessor ("androidx.room:room-compiler:2.4.0")
     implementation ("org.osmdroid:osmdroid-android:6.1.12")
     implementation ("androidx.compose.material3:material3:1.0.0")
     implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
 
 
 
