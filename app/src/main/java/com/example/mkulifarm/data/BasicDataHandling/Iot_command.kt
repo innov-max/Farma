@@ -1,4 +1,4 @@
-package com.example.mkulifarm.data
+package com.example.mkulifarm.data.BasicDataHandling
 
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

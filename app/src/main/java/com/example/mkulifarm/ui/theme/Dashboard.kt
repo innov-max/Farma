@@ -1,6 +1,6 @@
 package com.example.mkulifarm.ui.theme
 
-import Article
+import com.example.mkulifarm.data.BasicDataHandling.Article
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
@@ -9,7 +9,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Geocoder
-import android.media.Image
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -64,9 +63,10 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import coil.compose.rememberImagePainter
 import com.example.mkulifarm.R
-import com.example.mkulifarm.data.NewsResponse
-import com.example.mkulifarm.data.RetrofitClient
-import com.example.mkulifarm.data.RetrofitInstance
+import com.example.mkulifarm.data.BasicDataHandling.LEDStatus
+import com.example.mkulifarm.data.BasicDataHandling.NewsResponse
+import com.example.mkulifarm.data.BasicDataHandling.RetrofitClient
+import com.example.mkulifarm.data.BasicDataHandling.RetrofitInstance
 import com.example.mkulifarm.data.SoilData.SoilData
 
 import com.example.mkulifarm.data.WeatherViewModel
@@ -83,7 +83,7 @@ import retrofit2.Response
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
+import java.util.UUID
 
 
 class Dashboard : ComponentActivity() {
@@ -269,23 +269,31 @@ fun TopBar() {
 fun MetricsSection() {
 
     // State variables for storing soil data
-    var soilTemp by remember { mutableStateOf("Loading...") }
     var humidity by remember { mutableStateOf("Loading...") }
-    var soilMoisture by remember { mutableStateOf("Loading...") }
+    var temperature by remember { mutableStateOf("Loading...") }
+    var soilTemp by remember { mutableStateOf("Loading...") }
+    var soilMoisture by remember { mutableStateOf("...") }
+    var lastUpdated by remember { mutableStateOf("Loading...") }
 
     // Fetch data from Firebase
     LaunchedEffect(Unit) {
         val database = FirebaseDatabase.getInstance()
-        val soilRef = database.getReference("soilData")
+        val soilRef = database.getReference("sensorData")
         soilRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
 
                 val soilData = snapshot.getValue(SoilData::class.java)
                 if (soilData != null) {
                     // Update state with values from Firebase
-                    soilTemp = soilData.soilTemperature?.toString() ?: "N/A"
-                    humidity = soilData.soilMoisture?.toString() ?: "N/A"
-                    soilMoisture = soilData.soilHumidity?.toString() ?: "N/A"
+                    // Extract each sensor's data and timestamps
+                    humidity = snapshot.child("humidity").getValue(Float::class.java)?.toString() ?: "N/A"
+                    temperature = snapshot.child("temperature").getValue(Float::class.java)?.toString() ?: "N/A"
+                    soilTemp = snapshot.child("soilTemp").getValue(Float::class.java)?.toString() ?: "N/A"
+                    val rawMoisture = snapshot.child("moisture").getValue(Int::class.java) ?: 0
+                    soilMoisture = ((rawMoisture.toFloat() / 1023) * 100).toInt().toString()
+
+                    // Assume the last updated timestamp is from humidity
+                    lastUpdated = snapshot.child("humidity_timestamp").getValue(String::class.java) ?: "N/A"
                 }
             }
 
@@ -327,7 +335,7 @@ fun MetricsSection() {
             )
             MetricCard(
                 title = "Soil Moisture",
-                value = soilMoisture,
+                value = "$soilMoisture%",
                 image = painterResource(id = R.drawable.moisture)
 
 
@@ -373,7 +381,7 @@ fun MetricCard(title: String,
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(text = title, fontSize = 10.sp, color = Color.Gray)
-                Text(text = value, fontSize = 15.sp, color = Color.Black)
+                Text(text = value, fontSize = 24.sp, color = Color.Black)
             }
 
 
@@ -396,7 +404,7 @@ fun QuickActionsSection() {
                 label = "Water Plants",
                 animationRes = R.raw.water
             ) {
-                
+
 
                 // Add action for Water Plants
             }
@@ -420,8 +428,8 @@ fun QuickActionsSection() {
 }
 
 
-@SuppressLint("UnrememberedMutableState")
 @Composable
+@SuppressLint("UnrememberedMutableState")
 fun QuickActionButton(
     label: String,
     animationRes: Int,
@@ -429,6 +437,9 @@ fun QuickActionButton(
 ) {
     var ledStatus by remember { mutableStateOf(false) }
     val ledStates = mutableStateMapOf(1 to false, 2 to false, 3 to false, 4 to false)
+
+    // Use device ID (e.g., using UUID or a specific device identifier)
+    val deviceID = UUID.randomUUID().toString()
 
     val context = LocalContext.current
 
@@ -452,7 +463,7 @@ fun QuickActionButton(
                 when (label) {
                     "Enable Sensors" -> {
                         val currentState = ledStates[1] ?: false
-                        toggleLED(if (currentState) "off" else "on", 1) // Toggle LED 1
+                        toggleLED(if (currentState) "off" else "on", 1, deviceID) // Pass device ID
                         ledStates[1] = !currentState
                         ledStatus = ledStates[1] ?: false
                         showLEDNotification(context, if (ledStatus) "on" else "off")
@@ -467,7 +478,7 @@ fun QuickActionButton(
 
                     "Water Plants" -> {
                         val currentState = ledStates[2] ?: false
-                        toggleLED(if (currentState) "off" else "on", 2) // Toggle LED 2
+                        toggleLED(if (currentState) "off" else "on", 2, deviceID) // Pass device ID
                         ledStates[2] = !currentState
                         ledStatus = ledStates[2] ?: false
                         showLEDNotification(context, if (ledStatus) "on" else "off")
@@ -481,7 +492,7 @@ fun QuickActionButton(
                     }
                     "Adjust Temperature" -> {
                         val currentState = ledStates[3] ?: false
-                        toggleLED(if (currentState) "off" else "on", 3) // Toggle LED 3
+                        toggleLED(if (currentState) "off" else "on", 3, deviceID) // Pass device ID
                         ledStates[3] = !currentState
                         ledStatus = ledStates[3] ?: false
                         showLEDNotification(context, if (ledStatus) "on" else "off")
@@ -496,7 +507,7 @@ fun QuickActionButton(
 
                     "Activate Alarm" -> {
                         val currentState = ledStates[4] ?: false
-                        toggleLED(if (currentState) "off" else "on", 4) // Toggle LED 4
+                        toggleLED(if (currentState) "off" else "on", 4, deviceID) // Pass device ID
                         ledStates[4] = !currentState
                         ledStatus = ledStates[4] ?: false
                         showLEDNotification(context, if (ledStatus) "on" else "off")
@@ -529,6 +540,7 @@ fun QuickActionButton(
         }
     }
 }
+
 
 
 
@@ -822,7 +834,7 @@ fun navigateTo(context: Context, targetActivity: Class<*>) {
 
 
 
-fun toggleLED(action: String, ledNumber: Int) {
+/*fun toggleLED(action: String, ledNumber: Int) {
     val api = RetrofitClient.instance
     val call = when (ledNumber) {
         1 -> api.toggleLED1(action)
@@ -845,7 +857,44 @@ fun toggleLED(action: String, ledNumber: Int) {
 
         }
     })
+}*/
+fun toggleLED(action: String, ledNumber: Int, deviceID: String) {
+    val api = RetrofitClient.instance
+    val call = when (ledNumber) {
+        1 -> api.toggleLED1(action)
+        2 -> api.toggleLED2(action)
+        3 -> api.toggleLED3(action)
+        else -> null
+    }
+
+    // Create LEDStatus object with the new state
+    val currentTimestamp = System.currentTimeMillis().toString()
+    val ledStatus = LEDStatus(
+        ledState = action == "on",
+        deviceID = deviceID,
+        timestamp = currentTimestamp
+    )
+
+    // Send the updated LED status to Firebase
+    val database = FirebaseDatabase.getInstance()
+    val ledRef = database.getReference("ledStatus").child("LED$ledNumber")
+    ledRef.setValue(ledStatus)
+
+    call?.enqueue(object : Callback<Void> {
+        override fun onResponse(call: Call<Void>, response: Response<Void>) {
+            if (response.isSuccessful) {
+                Log.d("ToggleLED", "LED $ledNumber toggled $action successfully")
+            } else {
+                Log.e("ToggleLED", "Error response for LED $ledNumber: ${response.code()}")
+            }
+        }
+
+        override fun onFailure(call: Call<Void>, t: Throwable) {
+            Log.e("ToggleLED", "Failed to send request for LED $ledNumber: ${t.message}")
+        }
+    })
 }
+
 
 fun showLEDNotification(context: Context, action: String) {
     val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

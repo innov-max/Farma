@@ -1,22 +1,25 @@
 package com.example.mkulifarm.ui.theme
-
 import android.annotation.SuppressLint
+import android.app.Application
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -24,23 +27,40 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.ViewModelProvider
 import com.example.mkulifarm.R
-import com.example.mkulifarm.data.MetricData
+import com.example.mkulifarm.data.BasicDataHandling.MetricData
+import com.example.mkulifarm.data.BasicDataHandling.TaskViewModel
+import com.example.mkulifarm.data.BasicDataHandling.TaskViewModelFactory
 import com.example.mkulifarm.data.MetricsAnalysis.MetricsViewModel
-import com.example.mkulifarm.data.MetricsAnalysis.MockMetricsViewModel
+import com.example.mkulifarm.data.room_backup.FakeTaskDao
+import com.example.mkulifarm.data.room_backup.Task
+import com.example.mkulifarm.data.room_backup.TaskDao
+import com.example.mkulifarm.data.room_backup.pushTaskToFirebase
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.data.Entry
 import com.google.firebase.FirebaseApp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class DataAnalysis : ComponentActivity() {
+
+    val fakeTaskDao = FakeTaskDao() // Or get it from your database, depending on your implementation
+
+    // Use the application context properly
+    val taskViewModel: TaskViewModel by lazy {
+        ViewModelProvider(this, TaskViewModelFactory(application, fakeTaskDao))[TaskViewModel::class.java]
+    }
 
     private val metricsViewModel: MetricsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
 
         setTheme(R.style.Theme_MKuliFarm)
         if (FirebaseApp.getApps(this).isEmpty()) {
@@ -49,63 +69,71 @@ class DataAnalysis : ComponentActivity() {
 
         setContent {
 
+            Column(modifier = Modifier.fillMaxSize()) {
+
                 FarmAnalysisScreen(viewModel = metricsViewModel)
+                Spacer(modifier = Modifier.height(16.dp))
+                TodayActivitySection(taskViewModel = taskViewModel)
+
             }
+        }
 
     }
-    }
+}
 
 
+@SuppressLint("SuspiciousIndentation")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FarmAnalysisScreen(viewModel: MetricsViewModel) {
     val metrics by viewModel.metrics.collectAsState(initial = emptyList())
 
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Text(
-                            text = "Farm Data Analysis",
-                            style = TextStyle(
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold
-                            )
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "Farm Data Analysis",
+                        style = TextStyle(
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
                         )
-                    }
-                )
-            }
-        ) { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .fillMaxSize()
-                    .padding(16.dp)
-            ) {
-                Text(
-                    text = "Weekly Trends",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-
-                if (metrics.isEmpty()) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                } else {
-                    // Line Chart for Weekly Trends
-                    WeeklyTrendChart(metrics = metrics)
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Insights Section
-                    InsightsSection(metrics = metrics)
+                    )
                 }
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            Text(
+                text = "Weekly Usage",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
+            if (metrics.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                // Line Chart for Weekly Trends
+                WeeklyTrendChart(metrics = metrics)
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Insights Section
+                InsightsSection(metrics = metrics)
             }
         }
     }
+}
 
 
 @Composable
@@ -216,6 +244,62 @@ fun getMetricAdvice(metric: MetricData): String {
 }
 
 
+
+@Composable
+fun TodayActivitySection(taskViewModel: TaskViewModel) {
+    val tasks by taskViewModel.tasks.observeAsState(emptyList())
+
+    Column(modifier = Modifier.padding(6.dp)) {
+        Text("Today's Tasks", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Divider(Modifier.padding(vertical = 4.dp))
+
+        LazyColumn {
+            items(tasks) { task ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(task.title, fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                        Text(task.description, fontSize = 14.sp, color = Color.Gray)
+                    }
+                    Checkbox(
+                        checked = task.isCompleted,
+                        onCheckedChange = {
+                            taskViewModel.updateTaskCompletion(task, it)
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+
+fun generateTasksFromSensorData(moistureLevel: Int, nutrientLevel: Int, dao: TaskDao) {
+    val tasks = mutableListOf<Task>()
+
+    if (moistureLevel < 30) {
+        tasks.add(Task(title = "Water Crops", description = "Moisture level low: $moistureLevel%", time = "07:00"))
+    }
+    if (nutrientLevel < 50) {
+        tasks.add(Task(title = "Add Fertilizer", description = "Nutrient level low: $nutrientLevel%", time = "08:00"))
+    }
+
+    tasks.forEach {
+        CoroutineScope(Dispatchers.IO).launch {
+            dao.insertTask(it)
+            pushTaskToFirebase(it)
+        }
+    }
+}
+
+
+
 // Example function that uses ML to generate insights
 fun getWeeklyInsights(metrics: List<MetricData>): String {
     // Placeholder logic for generating insights
@@ -243,10 +327,18 @@ fun getWeeklyInsights(metrics: List<MetricData>): String {
 
 
 
-@Preview(showBackground = true)
+
+
+
+
 @Preview(showBackground = true)
 @Composable
 fun PreviewFarmAnalysisScreen() {
+
+    val context = LocalContext.current
+    val fakeTaskDao = FakeTaskDao() // Initialize FakeTaskDao for the preview
+    val taskViewModel = TaskViewModel(context.applicationContext as Application, fakeTaskDao)// Pass FakeTaskDao
+
     val previewMetrics = listOf(
         MetricData(name = "Moisture", value = 45f, unit = "%"),
         MetricData(name = "Temperature", value = 23f, unit = "°C"),
@@ -261,5 +353,6 @@ fun PreviewFarmAnalysisScreen() {
         WeeklyTrendChart(metrics = previewMetrics)
         Spacer(modifier = Modifier.height(16.dp))
         InsightsSection(metrics = previewMetrics)
+        TodayActivitySection(taskViewModel = taskViewModel)
     }
 }
