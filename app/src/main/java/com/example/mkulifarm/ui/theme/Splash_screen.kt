@@ -95,7 +95,7 @@ fun SplashScreenContent() {
             Spacer(modifier = Modifier.height(16.dp))
             // App name or tagline
             Text(
-                text = "Farminikia",
+                text = "FarmaTech",
                 fontSize = 44.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Green

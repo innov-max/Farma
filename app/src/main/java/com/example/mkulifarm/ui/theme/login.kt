@@ -204,7 +204,7 @@ fun LoginForm(
         OutlinedTextField(
             value = email,
             onValueChange = onEmailChange,
-            label = { Text("Email") },
+            label = { Text("Email:") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp),
@@ -214,7 +214,7 @@ fun LoginForm(
         OutlinedTextField(
             value = password,
             onValueChange = onPasswordChange,
-            label = { Text("Password") },
+            label = { Text("Password:") },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier
                 .fillMaxWidth()

@@ -225,7 +225,7 @@ fun TopBar() {
             ) {
 
             Text(
-                text = "Farminikia", fontSize = 34.sp,
+                text = "FarmaTech", fontSize = 34.sp,
                 color = Color.Black,
             )
             val locationName by remember { mutableStateOf("...") }
