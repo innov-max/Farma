@@ -111,7 +111,7 @@ fun FarmAnalysisScreen(viewModel: MetricsViewModel) {
                 .padding(16.dp)
         ) {
             Text(
-                text = "Weekly Usage",
+                text = "Weekly Usage:",
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
@@ -183,12 +183,10 @@ fun InsightsSection(metrics: List<MetricData>) {
     // Column to hold the entire section
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
-            text = "Weekly Insights",
+            text = "Weekly Insights:",
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(bottom = 8.dp)
         )
-
-        // Use LazyRow to display cards side by side
         LazyRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp) // Space between cards
@@ -206,7 +204,6 @@ fun InsightsSection(metrics: List<MetricData>) {
                             .padding(16.dp)
                             .fillMaxWidth()
                     ) {
-                        // Metric Name and Value
                         Text(
                             text = metric.name,
                             style = MaterialTheme.typography.bodyLarge,
@@ -217,10 +214,8 @@ fun InsightsSection(metrics: List<MetricData>) {
                             text = "${metric.value} ${metric.unit}",
                             style = MaterialTheme.typography.bodyLarge
                         )
-
-                        // Displaying advice for each metric
                         val advice = getMetricAdvice(metric)
-                        Spacer(modifier = Modifier.height(8.dp)) // Add space before advice
+                        Spacer(modifier = Modifier.height(8.dp)) 
                         Text(
                             text = advice,
                             style = MaterialTheme.typography.bodyMedium,
@@ -233,7 +228,6 @@ fun InsightsSection(metrics: List<MetricData>) {
     }
 }
 
-// Function to provide advice based on the metric
 fun getMetricAdvice(metric: MetricData): String {
     return when (metric.name) {
         "Fertilizer Use" -> "Recommended fertilizer usage is within optimal range."
