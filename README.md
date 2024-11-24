@@ -1,7 +1,3 @@
-Here’s an improved and more inviting version of the *Farma* README with detailed comments to guide you. The focus is on maintaining the humor, enhancing clarity, and ensuring a professional yet relatable tone. Comments are included for better understanding of the sections.
-
----
-
 # **Farma: The Ultimate Shamba App for Hustlers (Si Zakayo Though) and Smart Farmers!** 🚜🌱
 
 Bro, imagine your shamba running so smoothly that your neighbors start calling you the *Elon Musk of farming*! Welcome to **Farma**, the app that takes your farming game from “*kupiga kazi* kama mjengo” to “boss-level farming.” With **Farma**, you can manage your shamba from anywhere—whether you’re chilling at a *nyama choma* joint or stuck in *matatu* traffic.  
