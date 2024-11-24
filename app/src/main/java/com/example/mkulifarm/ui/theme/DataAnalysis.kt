@@ -1,25 +1,35 @@
 package com.example.mkulifarm.ui.theme
 import android.annotation.SuppressLint
 import android.app.Application
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.BottomNavigationItem
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -70,10 +80,11 @@ class DataAnalysis : ComponentActivity() {
         setContent {
 
             Column(modifier = Modifier.fillMaxSize()) {
+                TodayActivitySection(taskViewModel = taskViewModel)
 
                 FarmAnalysisScreen(viewModel = metricsViewModel)
-                Spacer(modifier = Modifier.height(16.dp))
-                TodayActivitySection(taskViewModel = taskViewModel)
+
+
 
             }
         }
@@ -82,12 +93,13 @@ class DataAnalysis : ComponentActivity() {
 }
 
 
+
 @SuppressLint("SuspiciousIndentation")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FarmAnalysisScreen(viewModel: MetricsViewModel) {
     val metrics by viewModel.metrics.collectAsState(initial = emptyList())
-
+    var selectedTab by remember { mutableStateOf(0) } // Manage selected tab state
 
     Scaffold(
         topBar = {
@@ -102,6 +114,9 @@ fun FarmAnalysisScreen(viewModel: MetricsViewModel) {
                     )
                 }
             )
+        },
+        bottomBar = {
+            BottomNavigationBarAnalysis(selectedTab) { selectedTab = it }
         }
     ) { innerPadding ->
         Column(
@@ -110,30 +125,41 @@ fun FarmAnalysisScreen(viewModel: MetricsViewModel) {
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            Text(
-                text = "Weekly Usage",
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+            when (selectedTab) {
+                0 -> {
+                    // Display Weekly Usage
+                    Text(
+                        text = "Weekly Usage",
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
 
-            if (metrics.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
+                    if (metrics.isEmpty()) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    } else {
+                        WeeklyTrendChart(metrics = metrics)
+                        Spacer(modifier = Modifier.height(16.dp))
+                        InsightsSection(metrics = metrics)
+                    }
                 }
-            } else {
-                // Line Chart for Weekly Trends
-                WeeklyTrendChart(metrics = metrics)
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Insights Section
-                InsightsSection(metrics = metrics)
+                1 -> {
+                    // Placeholder for analytics tab
+                    Text("Analytics Section", style = MaterialTheme.typography.titleLarge)
+                }
+                2 -> {
+                    // Placeholder for trends tab
+                    Text("Trends Section", style = MaterialTheme.typography.titleLarge)
+                }
             }
         }
     }
 }
+
 
 
 @Composable
@@ -250,7 +276,7 @@ fun TodayActivitySection(taskViewModel: TaskViewModel) {
     val tasks by taskViewModel.tasks.observeAsState(emptyList())
 
     Column(modifier = Modifier.padding(6.dp)) {
-        Text("Today's Tasks", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Text("Pending", fontSize = 25.sp, fontWeight = FontWeight.Bold)
         Divider(Modifier.padding(vertical = 4.dp))
 
         LazyColumn {
@@ -298,33 +324,61 @@ fun generateTasksFromSensorData(moistureLevel: Int, nutrientLevel: Int, dao: Tas
     }
 }
 
+@Composable
+fun BottomNavigationBarAnalysis(selectedTab: Int, onTabSelected: (Int) -> Unit) {
 
+    val context = LocalContext.current
 
-// Example function that uses ML to generate insights
-fun getWeeklyInsights(metrics: List<MetricData>): String {
-    // Placeholder logic for generating insights
-    var fertilizerAdvice = "No fertilizer data"
-    var waterAdvice = "No water data"
-    var soilHealthAdvice = "Soil health data missing"
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(75.dp)
+            .padding(10.dp)
+            .background(
+                Brush.linearGradient(
+                    colors = listOf(Color(0xFF00BCD4), Color(0xFF8BC34A)) // Set gradient colors
+                )
+            )
+    )
+    NavigationBar(
+        containerColor = Color.Transparent,
+        contentColor = Color.DarkGray
+    ) {
+        BottomNavigationItem(
+            icon = { Icon(Icons.Filled.Home, contentDescription = "Home") },
+            label = { Text("Home") },
+            selected = selectedTab == 0,
+            onClick = {
+                val intent = Intent(context, Dashboard::class.java)
+                context.startActivity(intent)
+            }
+        )
+        BottomNavigationItem(
+            icon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.analytics),
+                    contentDescription = "Custom Icon",
+                    modifier = Modifier.size(29.dp),
+                    tint = Color.Unspecified
+                )
+            },
+            label = { Text("Analytics") },
+            selected = selectedTab == 1,
+            onClick = {
 
-    metrics.forEach { metric ->
-        // Simple logic based on certain metric names
-        when (metric.name) {
-            "Fertilizer Use" -> {
-                fertilizerAdvice = "Weekly fertilizer usage is optimal"
             }
-            "Water Usage" -> {
-                waterAdvice = "Water usage is slightly high. Reduce watering"
+        )
+        BottomNavigationItem(
+            icon = { Icon(Icons.Filled.Settings, contentDescription = "Settings") },
+            label = { Text("Trends") },
+            selected = selectedTab == 2,
+            onClick = {
+                val intent = Intent(context, MyLand::class.java)
+                context.startActivity(intent)
             }
-            "Soil Health" -> {
-                soilHealthAdvice = "Soil health is good"
-            }
-        }
+        )
     }
-
-    return "Fertilizer Advice: $fertilizerAdvice\nWater Usage: $waterAdvice\nSoil Health: $soilHealthAdvice"
 }
-
 
 
 
