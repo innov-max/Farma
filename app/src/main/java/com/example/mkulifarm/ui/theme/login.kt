@@ -69,7 +69,7 @@ fun LoginRegisterScreen(
             .padding(top = 30.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
 
-    ) {
+        ) {
 
         Box(
             modifier = Modifier
@@ -84,7 +84,7 @@ fun LoginRegisterScreen(
                 modifier = Modifier.size(2400.dp)
                     .padding(50.dp),
 
-            )
+                )
         }
         // Customized Tab Row for Login/Register toggle
         TabRow(
@@ -122,7 +122,7 @@ fun LoginRegisterScreen(
                                 Toast.LENGTH_SHORT
                             ).show()
 
-                                    },
+                        },
                         onFailure = { errorMessage = it }
                     )
                 },
@@ -146,7 +146,7 @@ fun LoginRegisterScreen(
                                 Toast.LENGTH_SHORT
                             ).show()
 
-                                    },
+                        },
                         onFailure = { errorMessage = it }
                     )
                 },
@@ -175,14 +175,14 @@ fun LoginRegisterScreen(
                     painter = painterResource(id = R.drawable.facebook),
                     contentDescription = "Facebook",
 
-                )
+                    )
             }
             IconButton(onClick = { /* Google login */ }) {
                 Icon(
                     painter = painterResource(id = R.drawable.google),
                     contentDescription = "Google",
 
-                )
+                    )
             }
         }
     }
