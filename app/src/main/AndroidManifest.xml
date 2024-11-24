@@ -3,9 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
+
+
 
     <application
         android:allowBackup="true"
@@ -17,10 +22,14 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MKuliFarm"
+        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+        tools:replace="android:appComponentFactory"
         tools:targetApi="31">
         <activity
+            android:name=".ui.theme.MyLand"
+            android:exported="false" />
+        <activity
             android:name=".ui.theme.DataAnalysis"
-
             android:exported="false" />
         <activity
             android:name=".ui.theme.login"
@@ -32,9 +41,6 @@
             android:name=".ui.theme.Dashboard"
             android:exported="false" />
         <activity
-            android:name=".ui.theme.Login"
-            android:exported="false" />
-        <activity
             android:name=".ui.theme.Splash_screen"
             android:exported="true"
             android:theme="@style/Theme.MKuliFarm">
@@ -44,10 +50,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".MainActivity"
-            android:exported="false"
-            android:theme="@style/Theme.MKuliFarm" />
     </application>
 
 </manifest>

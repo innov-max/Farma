@@ -2,22 +2,4 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/nav_graph"
-    app:startDestination="@id/splash_screen">
-
-    <activity
-        android:id="@+id/splash_screen"
-        android:name="com.example.mkulifarm.ui.theme.Splash_screen"
-        android:label="activity_splash_screen"
-        tools:layout="@layout/activity_splash_screen" />
-    <activity
-        android:id="@+id/dashboard"
-        android:name="com.example.mkulifarm.ui.theme.Dashboard"
-        android:label="activity_dashboard"
-        tools:layout="@layout/activity_dashboard" />
-    <activity
-        android:id="@+id/login"
-        android:name="com.example.mkulifarm.ui.theme.Login"
-        android:label="activity_login"
-        tools:layout="@layout/activity_login" />
-</navigation>
+    android:id="@+id/nav_graph"/>

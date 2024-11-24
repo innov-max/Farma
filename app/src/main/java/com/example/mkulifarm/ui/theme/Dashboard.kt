@@ -865,17 +865,23 @@ class Dashboard :  ComponentActivity() {
                 },
                 label = { Text("Analytics") },
                 selected = selectedTab == 1,
-                onClick = {
-
-                    val intent = Intent(context, DataAnalysis::class.java)
+                onClick = { val intent = Intent(context, DataAnalysis::class.java)
                     context.startActivity(intent)
                 }
             )
             BottomNavigationItem(
-                icon = { Icon(Icons.Filled.Settings, contentDescription = "Settings") },
-                label = { Text("Trends") },
+                icon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.farm),
+                        contentDescription = "Custom Icon",
+                        modifier = Modifier.size(29.dp),
+                        tint = Color.Unspecified
+                    )
+                },
+                label = { Text("My farm") },
                 selected = selectedTab == 2,
                 onClick = {
+
                     val intent = Intent(context, MyLand::class.java)
                     context.startActivity(intent)
                 }

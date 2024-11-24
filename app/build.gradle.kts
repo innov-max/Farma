@@ -50,75 +50,104 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "META-INF/androidx.localbroadcastmanager_localbroadcastmanager.version"
+            excludes += "META-INF/androidx.appcompat_appcompat.version"
+            excludes += "build-data.properties"
+
+
         }
     }
+
 }
 
 dependencies {
-
-    implementation(libs.androidx.core.ktx)
+    // AndroidX libraries
+    implementation(libs.androidx.core.ktx)  // Ensure the latest compatible version
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
     implementation(libs.androidx.appcompat)
-    implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.runtime.livedata)
+
+    // Firebase and Google Play services
     implementation(libs.play.services.location)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.database.ktx)
+    implementation(libs.maps)
+
+    // Testing libraries
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+
+    // Debug tools
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    // Material Design and Lottie
     implementation(libs.lottie.compose)
-    implementation (libs.material3)
-    implementation (libs.androidx.material)
-    implementation ("io.ktor:ktor-client-core:2.1.1")
-    implementation ("io.ktor:ktor-client-cio:2.1.1")
-    implementation ("io.ktor:ktor-client-serialization:2.1.1")
-    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2")
-    implementation ("io.coil-kt:coil-compose:2.0.0")
-    implementation ("io.ktor:ktor-client-logging:2.3.3") // Ktor Client Logging
-    implementation ("io.ktor:ktor-client-cio:2.3.3") // Ktor Client CIO engine
-    implementation (libs.kotlinx.serialization.json)
-    implementation ("io.ktor:ktor-client-json:2.3.3")
-    implementation ("io.ktor:ktor-client-core:2.3.3") // Ktor Client Core
-    implementation ("io.ktor:ktor-client-json:2.3.3") // Ktor Client JSON
-    implementation ("io.ktor:ktor-client-serialization:2.3.3") // Ktor Client Serialization
-    implementation ("io.ktor:ktor-client-logging:2.3.3") // Ktor Client Logging
-    implementation ("io.ktor:ktor-client-cio:2.3.3") // Ktor Client CIO engine
-    implementation (libs.kotlinx.serialization.json.v160)
-    implementation("io.ktor:ktor-client-content-negotiation:2.3.3")
-    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation ("com.squareup.okhttp3:okhttp:4.9.3")
-    implementation ("androidx.security:security-crypto:1.1.0-alpha03")
-    implementation ("androidx.security:security-crypto:1.0.0")
-    implementation (libs.androidx.room.runtime)
-    implementation ("androidx.room:room-ktx:2.5.0")
-    annotationProcessor ("androidx.room:room-compiler:2.4.0")
-    implementation ("org.osmdroid:osmdroid-android:6.1.12")
-    implementation ("androidx.compose.material3:material3:1.0.0")
-    implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    implementation(libs.material3)
+    implementation(libs.androidx.material)
+
+    // Ktor Client libraries (removed duplicates and version conflicts)
+    implementation(libs.ktor.client.core.v233)
+    implementation(libs.ktor.client.cio.v233)
+    implementation (libs.ktor.client.android)
+    implementation(libs.ktor.client.serialization.v233)
+    implementation(libs.ktor.client.json)
+    implementation(libs.ktor.client.logging)
+    implementation(libs.ktor.client.content.negotiation)
 
 
+    // Coil for image loading
+    implementation("io.coil-kt:coil-compose:2.0.0")
 
+    // Coroutines for asynchronous tasks
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2")
 
+    // Retrofit and OkHttp
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
 
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.9.3") {
+        exclude(group = "androidx.customview", module = "customview")
+    }
 
+    // Security
+    implementation("androidx.security:security-crypto:1.1.0-alpha03")  // Keep the latest version
+
+    // Room Database
+    implementation(libs.androidx.room.runtime)
+    implementation("androidx.room:room-ktx:2.5.0")
+    annotationProcessor("androidx.room:room-compiler:2.4.0")
+
+    // OSMDroid for maps
+    implementation("org.osmdroid:osmdroid-android:6.1.12")
+
+    // MPAndroidChart for charting
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
+    implementation("com.android.volley:volley:1.2.1") {
+        exclude(group = "androidx.customview", module = "customview")
+    }
 
 
 }
+configurations.all {
+    resolutionStrategy {
+        force("androidx.core:core:1.13.1")
+        force("androidx.versionedparcelable:versionedparcelable:1.1.1")
+    }
+}
+
 
 
 

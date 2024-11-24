@@ -10,9 +10,16 @@ espressoCore = "3.6.1"
 kotlinxCoroutinesAndroid = "1.7.3"
 kotlinxSerializationJson = "1.6.3"
 kotlinxSerializationJsonVersion = "1.6.0"
+ktorClientAndroid = "2.3.0"
 ktorClientCio = "2.1.1"
+ktorClientCioVersion = "2.3.3"
+ktorClientContentNegotiation = "2.3.3"
 ktorClientCore = "2.1.1"
+ktorClientCoreVersion = "2.3.3"
+ktorClientJson = "2.3.3"
+ktorClientLogging = "2.3.3"
 ktorClientSerialization = "2.1.1"
+ktorClientSerializationVersion = "2.3.3"
 lifecycleRuntimeKtx = "2.8.6"
 activityCompose = "1.9.2"
 composeBom = "2024.04.01"
@@ -32,6 +39,7 @@ googleGmsGoogleServices = "4.4.2"
 firebaseAuth = "23.1.0"
 ui = "1.7.5"
 firebaseDatabaseKtx = "21.0.0"
+maps = "3.1.0-beta"
 
 [libraries]
 accompanist-coil = { module = "com.google.accompanist:accompanist-coil", version.ref = "accompanistCoil" }
@@ -56,9 +64,16 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 kotlinx-serialization-json-v160 = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJsonVersion" }
+ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktorClientAndroid" }
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktorClientCio" }
+ktor-client-cio-v233 = { module = "io.ktor:ktor-client-cio", version.ref = "ktorClientCioVersion" }
+ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktorClientContentNegotiation" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktorClientCore" }
+ktor-client-core-v233 = { module = "io.ktor:ktor-client-core", version.ref = "ktorClientCoreVersion" }
+ktor-client-json = { module = "io.ktor:ktor-client-json", version.ref = "ktorClientJson" }
+ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktorClientLogging" }
 ktor-client-serialization = { module = "io.ktor:ktor-client-serialization", version.ref = "ktorClientSerialization" }
+ktor-client-serialization-v233 = { module = "io.ktor:ktor-client-serialization", version.ref = "ktorClientSerializationVersion" }
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottieCompose" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
@@ -71,6 +86,7 @@ play-services-location = { group = "com.google.android.gms", name = "play-servic
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
 ui = { module = "androidx.compose.ui:ui", version.ref = "ui" }
 firebase-database-ktx = { group = "com.google.firebase", name = "firebase-database-ktx", version.ref = "firebaseDatabaseKtx" }
+maps = { group = "com.google.android.libraries.maps", name = "maps", version.ref = "maps" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
