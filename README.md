@@ -17,31 +17,40 @@ If yes, **Farma** is for you. Stop farming like it’s 2002 and let us introduce
 
 ## **📱 App Previews**
 
-### **1. App Icon on Your Home Screen**
-This is what **Farma** looks like on your device. Tap to launch and unlock your farm's potential!
-![WhatsApp Image 2024-11-19 at 12 52 21_a6f3e150](https://github.com/user-attachments/assets/81348897-4c5b-4179-afd1-9aecd47534fd)
-
+Here’s what you can expect from the **Farma** app:
 
 ---
 
-### **2. App Launch (Loading Screen)**
-When you open the app, it greets you with this clean and modern loading screen to get things ready for your shamba management.
-![WhatsApp Image 2024-11-19 at 12 52 59_5f736f2f](https://github.com/user-attachments/assets/f87b9484-6121-44bd-bcc5-58932b794424)
+### **1. App Icon and Loading Screen**
 
+| **App Icon** | **App Loading Screen** |
+|--------------|-------------------------|
+| ![IMG-20241126-WA0036 1](https://github.com/user-attachments/assets/866a89e5-2f84-4a42-bcea-cc24eca43e6a)|![IMG-20241126-WA0035 1](https://github.com/user-attachments/assets/af94348e-b110-4873-bc00-588912fd1516)|
 
----
-
-### **3. Home Screen**
-The heart of your farm management. From real-time farm monitoring to quick actions like watering plants, it’s all here!
-![WhatsApp Image 2024-11-19 at 12 53 21_c4eca25e](https://github.com/user-attachments/assets/b0ec563b-c6d6-4a80-b8f0-1406b957754d)
-
+- **App Icon**: Easily recognizable on your home screen.  
+- **Loading Screen**: Smooth and professional loading animation before you dive into managing your shamba.
 
 ---
 
-### **4. Farm Data Analysis**
-Track trends and insights like water usage, fertilizer consumption, and energy savings over time.
-![WhatsApp Image 2024-11-19 at 12 53 40_b0edbf0f](https://github.com/user-attachments/assets/554d62f2-3e9d-4013-9314-b5efef6c7047)
+### **2. Home Screen and Data Analysis**
 
+| **Home Screen** | **Data Analysis** |
+|-----------------|-------------------|
+|![WhatsApp Image 2024-11-19 at 12 53 21_47021eff](https://github.com/user-attachments/assets/6e2a8209-c1b2-41e0-aee0-b845938a17c8)|![WhatsApp Image 2024-11-19 at 12 53 40_d3463be8](https://github.com/user-attachments/assets/3bf50240-d375-466d-ae0b-51348b013653)|
+
+- **Home Screen**: Access real-time farm monitoring and quick actions like watering your plants or adjusting temperature.  
+- **Farm Data Analysis**: View trends and weekly insights, including water usage, fertilizer application, and more.
+
+---
+
+### **3. Tasks and Farm Mapping**
+
+| **Tasks Page** | **Farm Mapping** |
+|----------------|------------------|
+|![WhatsApp Image 2024-11-26 at 09 37 20_11feadcc](https://github.com/user-attachments/assets/f7fa9dd3-5ce0-4189-84f0-34291e3f2e8f)|![WhatsApp Image 2024-11-26 at 09 37 20_22640d1a](https://github.com/user-attachments/assets/18169258-8329-42f8-9546-3d28bcc73ef7)|
+
+- **Tasks Page**: Stay organized with actionable insights like checking soil acidity or managing irrigation schedules.  
+- **Farm Mapping**: Use Google Maps to define your farm area, view coordinates, and save farm locations for accurate tracking.
 
 ---
 
@@ -155,4 +164,3 @@ Level up your farming game today. Let’s turn your shamba into a productivity m
 - Just smart farming made simple.
 
 **Bro, are you ready to farm like a pro? Download *Farma* now and start running your shamba like the boss you were meant to be!** 🚜🌱
-
